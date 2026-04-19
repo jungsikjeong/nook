@@ -34,8 +34,8 @@ export default function RootLayout({
       lang='en'
       className={`${paperlogy.variable} ${geistMono.variable} antialiased`}
     >
-      <body className='min-h-screen bg-[#f3f3f3] flex items-center justify-center px-6'>
-        <main className='relative w-full max-w-310 h-180 rounded-[32px] bg-[#dbe7d8] overflow-hidden'>
+      <body className='min-h-dvh bg-[#dbe7d8] md:bg-[#f3f3f3] md:flex md:items-center md:justify-center md:px-6'>
+        <main className='relative min-h-dvh w-full bg-[#dbe7d8] overflow-hidden md:min-h-0 md:h-180 md:max-w-310 md:rounded-[32px]'>
           <HamburgerMenu />
           {children}
         </main>

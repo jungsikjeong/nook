@@ -3,7 +3,7 @@ import Link from 'next/link';
 
 export function Character() {
   return (
-    <div className='group absolute left-1/2 top-23 -translate-x-1/2 w-115 aspect-1024/1536 transition-transform duration-300 hover:scale-[1.02]'>
+    <div className='group absolute left-1/2 bottom-32 -translate-x-1/2 w-[65vw] max-w-115 aspect-1024/1536 transition-transform duration-300 hover:scale-[1.02] md:bottom-auto md:top-23 md:w-115'>
       <Link href='/about' className='absolute inset-0 block'>
         <Image
           src='/profile.png'

@@ -24,9 +24,9 @@ export function HamburgerMenu() {
     <Sheet>
       <SheetTrigger
         aria-label='메뉴 열기'
-        className='absolute right-10 top-10 text-white/90 hover:text-white transition-colors cursor-pointer'
+        className='absolute right-5 top-5 text-white/90 hover:text-white transition-colors cursor-pointer md:right-10 md:top-10'
       >
-        <Menu size={40} strokeWidth={2.5} />
+        <Menu className='w-8 h-8 md:w-10 md:h-10' strokeWidth={2.5} />
       </SheetTrigger>
 
       <SheetContent side='right' className='sm:max-w-sm'>

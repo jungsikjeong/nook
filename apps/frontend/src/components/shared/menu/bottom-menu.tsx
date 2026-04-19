@@ -14,7 +14,7 @@ const items = [
 
 export function BottomMenu() {
   return (
-    <div className='absolute left-1/2 bottom-10 -translate-x-1/2 flex items-start gap-7'>
+    <div className='absolute left-1/2 bottom-8 -translate-x-1/2 flex items-start gap-5 md:bottom-10 md:gap-7'>
       {items.map((item) => (
         <MenuItem key={item.href} {...item} />
       ))}
@@ -34,9 +34,9 @@ function MenuItem({ src, alt, href, label }: MenuItemProps) {
     <Link
       href={href}
       aria-label={label}
-      className='relative w-23 h-23 rounded-[24px] overflow-hidden cursor-pointer transition-transform duration-200 hover:scale-105'
+      className='relative w-18 h-18 rounded-[18px] overflow-hidden cursor-pointer transition-transform duration-200 hover:scale-105 md:w-23 md:h-23 md:rounded-[24px]'
     >
-      <Image src={src} alt={alt} fill sizes='92px' className='object-cover' />
+      <Image src={src} alt={alt} fill sizes='(min-width: 768px) 92px, 72px' className='object-cover' />
     </Link>
   );
 }
