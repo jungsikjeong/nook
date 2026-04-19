@@ -3,6 +3,7 @@ import { Geist_Mono } from 'next/font/google';
 import localFont from 'next/font/local';
 import './globals.css';
 import { HamburgerMenu } from '@/components/shared/menu';
+import { TooltipProvider } from '@/components/ui/tooltip';
 
 const paperlogy = localFont({
   variable: '--font-paperlogy',
@@ -35,10 +36,12 @@ export default function RootLayout({
       className={`${paperlogy.variable} ${geistMono.variable} antialiased`}
     >
       <body className='min-h-dvh bg-[#dbe7d8] md:bg-[#f3f3f3] md:flex md:items-center md:justify-center md:px-6'>
-        <main className='relative min-h-dvh w-full bg-[#dbe7d8] overflow-hidden md:min-h-0 md:h-180 md:max-w-310 md:rounded-[32px]'>
-          <HamburgerMenu />
-          {children}
-        </main>
+        <TooltipProvider delay={200}>
+          <main className='relative min-h-dvh w-full bg-[#dbe7d8] overflow-hidden md:min-h-0 md:h-180 md:max-w-310 md:rounded-[32px]'>
+            <HamburgerMenu />
+            {children}
+          </main>
+        </TooltipProvider>
       </body>
     </html>
   );
