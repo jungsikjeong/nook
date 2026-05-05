@@ -1,0 +1,49 @@
+# Run from the apps/nook/backend directory:
+#   docker compose up -d postgres   # start only the database
+#   docker compose up backend       # start backend in dev mode (hot reload)
+#
+# The build context is the monorepo root so pnpm workspaces resolve correctly.
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: nook-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: nook
+      POSTGRES_PASSWORD: nook
+      POSTGRES_DB: nook
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nook -d nook"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    container_name: nook-backend
+    build:
+      context: ../../..
+      dockerfile: apps/nook/backend/Dockerfile
+      target: dev
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql://nook:nook@postgres:5432/nook
+    ports:
+      - "3001:3001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ../../../apps/nook/backend/src:/repo/apps/nook/backend/src
+      - ../../../apps/nook/backend/drizzle:/repo/apps/nook/backend/drizzle
+      - ../../../apps/nook/backend/scripts:/repo/apps/nook/backend/scripts
+      - ../../../apps/nook/backend/tsconfig.json:/repo/apps/nook/backend/tsconfig.json
+      - ../../../apps/nook/backend/tsconfig.build.json:/repo/apps/nook/backend/tsconfig.build.json
+      - ../../../apps/nook/backend/nest-cli.json:/repo/apps/nook/backend/nest-cli.json
+
+volumes:
+  pgdata:

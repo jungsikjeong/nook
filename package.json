@@ -1,10 +1,12 @@
 {
-  "name": "nook",
+  "name": "studio",
   "version": "0.0.0",
   "private": true,
   "scripts": {
     "dev": "pnpm -r --parallel dev",
     "dev:frontend": "pnpm --filter frontend dev",
+    "dev:backend": "pnpm --filter backend dev",
+    "dev:auth": "pnpm --filter auth dev",
     "build": "pnpm -r build",
     "lint": "pnpm -r lint",
     "typecheck": "pnpm -r typecheck"
