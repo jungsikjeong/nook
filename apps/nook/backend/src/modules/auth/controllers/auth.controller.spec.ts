@@ -1,11 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { AppLogger, RequestContext, Role } from '@nook/nest-common';
 import { describe } from 'node:test';
-import { AuthController } from './auth.controller';
-import { AuthService } from '../services/auth.service';
-import { AppLogger } from '@/shared/logger/logger.service';
-import { RequestContext } from '@/shared/request-context/request-context.dto';
+
 import { SignUpDto } from '../dto/sign-up.dto';
-import { Role } from '@/shared/enums/role.enum';
+import { AuthService } from '../services/auth.service';
+import { AuthController } from './auth.controller';
 
 describe('AuthController', () => {
   let moduleRef: TestingModule;

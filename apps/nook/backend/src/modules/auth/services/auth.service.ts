@@ -1,13 +1,13 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
+import { AppLogger, RequestContext } from '@nook/nest-common';
 import * as bcrypt from 'bcrypt';
 
 import { Database, DATABASE } from '@/db/db.service';
 import type { SignUpDto } from '@/modules/auth/dto/sign-up.dto';
 import { UsersService } from '@/modules/users/services/users.service';
-import { AppLogger } from '@/shared/logger/logger.service';
-import { RequestContext } from '@/shared/request-context/request-context.dto';
+
 import { ROLE } from '../constants/role.constant';
 
 const BCRYPT_ROUNDS = 12;

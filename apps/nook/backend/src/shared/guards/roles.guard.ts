@@ -5,12 +5,10 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
+import { type Role, ROLES_KEY } from '@nook/nest-common';
 
 import { JwtPayload } from '@/modules/auth/strategies/jwt.strategy';
 import { UsersService } from '@/modules/users/services/users.service';
-
-import { ROLES_KEY } from '../decorators/roles.decorator';
-import type { Role } from '../enums/role.enum';
 
 @Injectable()
 export class RolesGuard implements CanActivate {

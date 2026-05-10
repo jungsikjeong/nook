@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 
-import type { AuthUser } from '@/shared/types/auth-user';
+import type { AuthUser } from '@nook/nest-common';
 
 export const ACCESS_TOKEN_COOKIE = 'access_token';
 export const REFRESH_COOKIE = 'refresh_token';

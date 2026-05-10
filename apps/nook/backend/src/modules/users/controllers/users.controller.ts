@@ -1,8 +1,9 @@
+import { Controller, Get, NotFoundException } from '@nestjs/common';
+import { Role, Roles } from '@nook/nest-common';
+
 import { JwtPayload } from '@/modules/auth/strategies/jwt.strategy';
 import { CurrentUser } from '@/shared/decorators/current-user.decorator';
-import { Roles } from '@/shared/decorators/roles.decorator';
-import { Role } from '@/shared/enums/role.enum';
-import { Controller, Get, NotFoundException } from '@nestjs/common';
+
 import { UserResDto } from '../dto/users-res-dto';
 import { UsersService } from '../services/users.service';
 

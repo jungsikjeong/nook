@@ -4,9 +4,12 @@ import { NestFactory } from '@nestjs/core';
 import cookieParser from 'cookie-parser';
 import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 
+import {
+  RequestIdMiddleware,
+  VALIDATION_PIPE_OPTIONS,
+} from '@nook/nest-common';
+
 import { AppModule } from './app.module';
-import { VALIDATION_PIPE_OPTIONS } from './shared/constants';
-import { RequestIdMiddleware } from './shared/middlewares/request-id/request-id.middleware';
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule, { bufferLogs: true });

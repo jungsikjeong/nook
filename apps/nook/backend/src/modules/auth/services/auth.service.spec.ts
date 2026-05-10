@@ -1,12 +1,13 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { AuthService } from './auth.service';
-import { UsersService } from '@/modules/users/services/users.service';
-import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { AppLogger } from '@/shared/logger/logger.service';
-import { RequestContext } from '@/shared/request-context/request-context.dto';
-import { SignUpDto } from '../dto/sign-up.dto';
+import { JwtService } from '@nestjs/jwt';
+import { Test, TestingModule } from '@nestjs/testing';
+import { AppLogger, RequestContext } from '@nook/nest-common';
+
+import { UsersService } from '@/modules/users/services/users.service';
+
 import { ROLE } from '../constants/role.constant';
+import { SignUpDto } from '../dto/sign-up.dto';
+import { AuthService } from './auth.service';
 
 describe('AuthService', () => {
   let service: AuthService;
