@@ -4,9 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "pnpm -r --parallel dev",
-    "dev:frontend": "pnpm --filter frontend dev",
-    "dev:backend": "pnpm --filter backend dev",
-    "dev:auth": "pnpm --filter auth dev",
+    "dev:frontend": "pnpm --filter @nook/frontend dev",
+    "dev:backend": "pnpm --filter @nook/backend dev",
+    "dev:auth": "pnpm --filter @nook/auth dev",
     "build": "pnpm -r build",
     "lint": "pnpm -r lint",
     "typecheck": "pnpm -r typecheck"

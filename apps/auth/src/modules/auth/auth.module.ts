@@ -1,12 +1,16 @@
-import { Module } from '@nestjs/common';
-import { UsersModule } from '../users/users.module';
-import { AuthController } from './auth.controller';
-import { AuthService } from './auth.service';
+import { Global, Module } from '@nestjs/common';
+import { auth } from '../../lib/auth';
 
+export const AUTH = Symbol('AUTH');
+
+@Global()
 @Module({
-  imports: [UsersModule],
-  controllers: [AuthController],
-  providers: [AuthService],
-  exports: [AuthService],
+  providers: [
+    {
+      provide: AUTH,
+      useValue: auth,
+    },
+  ],
+  exports: [AUTH],
 })
 export class AuthModule {}

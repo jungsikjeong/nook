@@ -1,2 +1,2 @@
-export * from './schema';
-export * from './oidc';
+export * from './auth';
+export * from './oauth';
