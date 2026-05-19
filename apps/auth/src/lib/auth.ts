@@ -1,31 +1,28 @@
-import { oauthProvider } from '@better-auth/oauth-provider';
 import { betterAuth } from 'better-auth';
-import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { jwt } from 'better-auth/plugins';
+import { drizzleAdapter } from 'better-auth/adapters/drizzle';
+import { oauthProvider } from '@better-auth/oauth-provider';
 import { db } from '../database/client';
-import * as schema from '../database/schema';
-
-const webUrl = process.env.WEB_URL ?? 'http://localhost:3000';
 
 export const auth = betterAuth({
-  baseURL: process.env.BETTER_AUTH_URL ?? 'http://localhost:3001',
-  secret: process.env.BETTER_AUTH_SECRET,
   database: drizzleAdapter(db, {
     provider: 'pg',
-    schema,
   }),
-  emailAndPassword: {
-    enabled: true,
+  emailAndPassword: { enabled: true },
+  silenceWarnings: {
+    oauthAuthServerConfig: true,
   },
+  disabledPaths: ['/token'],
   plugins: [
-    jwt(),
+    jwt({
+      jwks: {
+        keyPairConfig: { alg: 'RS256' },
+      },
+    }),
     oauthProvider({
-      loginPage: `${webUrl}/login`,
-      consentPage: `${webUrl}/consent`,
-      scopes: ['openid', 'profile', 'email', 'offline_acc봐ess'],
-      allowDynamicClientRegistration: false,
+      loginPage: '/signin',
+      consentPage: '/consent',
+      // ...other options
     }),
   ],
 });
-
-export type Auth = typeof auth;

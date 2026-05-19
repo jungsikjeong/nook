@@ -18,21 +18,24 @@ async function bootstrap(): Promise<void> {
     bodyParser: false,
   });
 
-  // better-auth는 가공되지 않은 원본 요청 스트림을 받아야 하므로
-  // body parser 미들웨어보다 먼저 마운트한다.
-  app.use('/api/auth', toNodeHandler(auth));
-
   // OIDC / OAuth 2.0 디스커버리 메타데이터.
-  // 플러그인은 fetch 스타일 핸들러를 반환하므로 toNodeHandler로 Node req/res에 연결한다.
+  // issuer path가 /api/auth이므로 RFC 8414/OIDC Discovery 규칙에 맞춰
+  //  - openid-configuration: issuer path 뒤에 .well-known을 붙임
+  //  - oauth-authorization-server: .well-known 뒤에 issuer path를 붙임
+  // catch-all(`app.use('/api/auth', ...)`)보다 먼저 등록해야 매칭된다.
   const expressApp = app.getHttpAdapter().getInstance() as Express;
   expressApp.get(
-    '/.well-known/openid-configuration',
+    '/api/auth/.well-known/openid-configuration',
     toNodeHandler(oauthProviderOpenIdConfigMetadata(auth)),
   );
   expressApp.get(
-    '/.well-known/oauth-authorization-server',
+    '/.well-known/oauth-authorization-server/api/auth',
     toNodeHandler(oauthProviderAuthServerMetadata(auth)),
   );
+
+  // better-auth는 가공되지 않은 원본 요청 스트림을 받아야 하므로
+  // body parser 미들웨어보다 먼저 마운트한다.
+  app.use('/api/auth', toNodeHandler(auth));
 
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
