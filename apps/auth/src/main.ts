@@ -18,6 +18,12 @@ async function bootstrap(): Promise<void> {
     bodyParser: false,
   });
 
+  const corsOrigin = process.env.CORS_ORIGIN ?? 'http://localhost:3000';
+  app.enableCors({
+    origin: corsOrigin.split(',').map((s) => s.trim()),
+    credentials: true,
+  });
+
   // OIDC / OAuth 2.0 디스커버리 메타데이터.
   // issuer path가 /api/auth이므로 RFC 8414/OIDC Discovery 규칙에 맞춰
   //  - openid-configuration: issuer path 뒤에 .well-known을 붙임
@@ -47,12 +53,6 @@ async function bootstrap(): Promise<void> {
       transform: true,
     }),
   );
-
-  const corsOrigin = process.env.CORS_ORIGIN ?? 'http://localhost:3000';
-  app.enableCors({
-    origin: corsOrigin.split(',').map((s) => s.trim()),
-    credentials: true,
-  });
 
   const port = Number(process.env.PORT) || 3001;
   await app.listen(port);
