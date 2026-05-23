@@ -7,8 +7,9 @@ import {
 import { Reflector } from '@nestjs/core';
 import { type Role, ROLES_KEY } from '@nook/nest-common';
 
-import { JwtPayload } from '@/modules/auth/strategies/jwt.strategy';
 import { UsersService } from '@/modules/users/services/users.service';
+
+import { type AuthenticatedUser } from '../decorators/current-user.decorator';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
@@ -26,10 +27,16 @@ export class RolesGuard implements CanActivate {
       return true;
     }
 
-    const request = context.switchToHttp().getRequest<{ user?: JwtPayload }>();
+    const request = context
+      .switchToHttp()
+      .getRequest<{ user?: AuthenticatedUser }>();
     const payload = request.user;
     if (!payload) {
       throw new ForbiddenException('Authentication required');
+    }
+
+    if (payload.role && requiredRoles.includes(payload.role)) {
+      return true;
     }
 
     const dbUser = await this.users.findById(payload.sub);

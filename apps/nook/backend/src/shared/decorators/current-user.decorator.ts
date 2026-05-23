@@ -3,12 +3,22 @@ import {
   InternalServerErrorException,
   type ExecutionContext,
 } from '@nestjs/common';
+import { type Role } from '@nook/nest-common';
 
-import { JwtPayload } from '@/modules/auth/strategies/jwt.strategy';
+export interface AuthenticatedUser {
+  id: string;
+  sub: string;
+  email: string;
+  name: string;
+  image?: string | null;
+  role?: Role;
+}
 
 export const CurrentUser = createParamDecorator(
-  (_, ctx: ExecutionContext): JwtPayload => {
-    const request = ctx.switchToHttp().getRequest<{ user?: JwtPayload }>();
+  (_, ctx: ExecutionContext): AuthenticatedUser => {
+    const request = ctx
+      .switchToHttp()
+      .getRequest<{ user?: AuthenticatedUser }>();
     if (!request.user) {
       throw new InternalServerErrorException(
         '@CurrentUser was used without auth guard',

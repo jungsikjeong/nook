@@ -1,113 +1,151 @@
-import { ConflictException, Inject, Injectable } from '@nestjs/common';
-import { eq, or } from 'drizzle-orm';
+import { Inject, Injectable } from '@nestjs/common';
+import { desc, eq } from 'drizzle-orm';
 
 import { DATABASE, type Database } from '@/db/db.service';
-import { profiles, type User, users } from '@/db/schema';
+import { profiles, user, type ProfileRow, type User } from '@/db/schema';
 import { plainToClass } from 'class-transformer';
 import { UserResDto } from '../dto/users-res-dto';
-
-export interface CreateUserInput {
-  loginId: string;
-  passwordHash: string;
-  name: string;
-  nickname: string;
-  email: string;
-}
+import { ProfileInitializationFailedError } from '../errors/profile-initialization-failed.error';
 
 @Injectable()
 export class UsersService {
   constructor(@Inject(DATABASE) private readonly db: Database) {}
 
-  async findByLoginId(loginId: string): Promise<User | null> {
-    const [row] = await this.db
-      .select()
-      .from(users)
-      .where(eq(users.loginId, loginId))
-      .limit(1);
-    return row ?? null;
-  }
-
   async findById(id: string): Promise<User | null> {
     const [row] = await this.db
       .select()
-      .from(users)
-      .where(eq(users.id, id))
+      .from(user)
+      .where(eq(user.id, id))
       .limit(1);
     return row ?? null;
+  }
+
+  async ensureProfile(userId: string): Promise<ProfileRow> {
+    const [inserted] = await this.db
+      .insert(profiles)
+      .values({ userId })
+      .onConflictDoNothing({ target: profiles.userId })
+      .returning();
+
+    if (inserted) {
+      return inserted;
+    }
+
+    const [existing] = await this.db
+      .select()
+      .from(profiles)
+      .where(eq(profiles.userId, userId))
+      .limit(1);
+
+    if (!existing) {
+      throw new ProfileInitializationFailedError(userId);
+    }
+
+    return existing;
   }
 
   async findByIdWithProfile(id: string): Promise<UserResDto | null> {
-    const user = await this.db.query.users.findFirst({
-      where: eq(users.id, id),
-      with: { profile: true },
-    });
-    return plainToClass(UserResDto, user, { excludeExtraneousValues: true });
-  }
-
-  async createWithProfile(input: CreateUserInput): Promise<User> {
-    return this.db.transaction(async (tx) => {
-      const conflict = await tx
-        .select({
-          id: users.id,
-          loginId: users.loginId,
-          email: users.email,
-          nickname: users.nickname,
-        })
-        .from(users)
-        .where(
-          or(
-            eq(users.loginId, input.loginId),
-            eq(users.email, input.email),
-            eq(users.nickname, input.nickname),
-          ),
-        )
-        .limit(1);
-
-      if (conflict.length > 0) {
-        const existing = conflict[0];
-        if (existing.loginId === input.loginId) {
-          throw new ConflictException('이미 사용 중인 로그인 아이디입니다.');
-        }
-        if (existing.nickname === input.nickname) {
-          throw new ConflictException('이미 사용 중인 닉네임입니다.');
-        }
-        throw new ConflictException('이미 사용 중인 이메일입니다.');
-      }
-
-      const [user] = await tx
-        .insert(users)
-        .values({
-          loginId: input.loginId,
-          password: input.passwordHash,
-          name: input.name,
-          nickname: input.nickname,
-          email: input.email,
-        })
-        .returning();
-
-      await tx.insert(profiles).values({
-        userId: user.id,
-      });
-
-      return user;
-    });
-  }
-
-  async findByNickname(nickname: string): Promise<User | null> {
     const [row] = await this.db
-      .select()
-      .from(users)
-      .where(eq(users.nickname, nickname))
+      .select({
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        emailVerified: user.emailVerified,
+        image: user.image,
+        role: user.role,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+        profileUserId: profiles.userId,
+        nickname: profiles.nickname,
+        profileImageUrls: profiles.profileImageUrls,
+        bio: profiles.bio,
+        profileCreatedAt: profiles.createdAt,
+        profileUpdatedAt: profiles.updatedAt,
+      })
+      .from(user)
+      .leftJoin(profiles, eq(profiles.userId, user.id))
+      .where(eq(user.id, id))
       .limit(1);
-    return row ?? null;
+
+    if (!row) {
+      return null;
+    }
+
+    const profile = row.profileUserId
+      ? {
+          userId: row.profileUserId,
+          nickname: row.nickname,
+          profileImageUrls: row.profileImageUrls ?? [],
+          bio: row.bio,
+          createdAt: row.profileCreatedAt ?? row.createdAt,
+          updatedAt: row.profileUpdatedAt ?? row.updatedAt,
+        }
+      : await this.ensureProfile(row.id);
+
+    return plainToClass(
+      UserResDto,
+      {
+        id: row.id,
+        name: row.name,
+        email: row.email,
+        emailVerified: row.emailVerified,
+        image: row.image,
+        role: row.role,
+        createdAt: row.createdAt,
+        updatedAt: row.updatedAt,
+        nickname: profile.nickname,
+        profile,
+      },
+      { excludeExtraneousValues: true },
+    );
   }
 
   async listAll(): Promise<UserResDto[]> {
-    const users = await this.db.query.users.findMany({
-      with: { profile: true },
-      orderBy: (table, { desc }) => [desc(table.createdAt)],
-    });
+    const rows = await this.db
+      .select({
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        emailVerified: user.emailVerified,
+        image: user.image,
+        role: user.role,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+        profileUserId: profiles.userId,
+        nickname: profiles.nickname,
+        profileImageUrls: profiles.profileImageUrls,
+        bio: profiles.bio,
+        profileCreatedAt: profiles.createdAt,
+        profileUpdatedAt: profiles.updatedAt,
+      })
+      .from(user)
+      .leftJoin(profiles, eq(profiles.userId, user.id))
+      .orderBy(desc(user.createdAt));
 
-    return plainToClass(UserResDto, users, { excludeExtraneousValues: true });
+    return plainToClass(
+      UserResDto,
+      rows.map((row) => ({
+        id: row.id,
+        name: row.name,
+        email: row.email,
+        emailVerified: row.emailVerified,
+        image: row.image,
+        role: row.role,
+        createdAt: row.createdAt,
+        updatedAt: row.updatedAt,
+        nickname: row.nickname,
+        profile: row.profileUserId
+          ? {
+              userId: row.profileUserId,
+              nickname: row.nickname,
+              profileImageUrls: row.profileImageUrls,
+              bio: row.bio,
+              createdAt: row.profileCreatedAt,
+              updatedAt: row.profileUpdatedAt,
+            }
+          : null,
+      })),
+      { excludeExtraneousValues: true },
+    );
   }
 }

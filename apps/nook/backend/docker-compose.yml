@@ -12,8 +12,9 @@ services:
       POSTGRES_USER: nook
       POSTGRES_PASSWORD: nook
       POSTGRES_DB: nook
+    # host 5432 는 네이티브 PostgreSQL 이 점유하므로 5434 로 매핑한다.
     ports:
-      - "5432:5432"
+      - "5434:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:

@@ -1,8 +1,10 @@
 import { Controller, Get, NotFoundException } from '@nestjs/common';
 import { Role, Roles } from '@nook/nest-common';
 
-import { JwtPayload } from '@/modules/auth/strategies/jwt.strategy';
-import { CurrentUser } from '@/shared/decorators/current-user.decorator';
+import {
+  type AuthenticatedUser,
+  CurrentUser,
+} from '@/shared/decorators/current-user.decorator';
 
 import { UserResDto } from '../dto/users-res-dto';
 import { UsersService } from '../services/users.service';
@@ -12,7 +14,7 @@ export class UsersController {
   constructor(private readonly users: UsersService) {}
 
   @Get('me')
-  async me(@CurrentUser() current: JwtPayload): Promise<UserResDto> {
+  async me(@CurrentUser() current: AuthenticatedUser): Promise<UserResDto> {
     const user = await this.users.findByIdWithProfile(current.sub);
     if (!user) {
       throw new NotFoundException('User not found');

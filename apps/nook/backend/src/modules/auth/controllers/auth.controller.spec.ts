@@ -1,6 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { AppLogger, RequestContext, Role } from '@nook/nest-common';
-import { describe } from 'node:test';
+import { AppLogger, RequestContext } from '@nook/nest-common';
 
 import { SignUpDto } from '../dto/sign-up.dto';
 import { AuthService } from '../services/auth.service';
@@ -11,7 +10,7 @@ describe('AuthController', () => {
   let authController: AuthController;
 
   const mockedAuthService = {
-    signup: jest.fn(),
+    signUp: jest.fn(),
     login: jest.fn(),
     refreshToken: jest.fn(),
   };
@@ -45,9 +44,11 @@ describe('AuthController', () => {
       signupDto.nickname = 'testuser';
       signupDto.email = 'test@example.com';
 
-      jest.spyOn(mockedAuthService, 'signup').mockResolvedValue(null);
+      jest.spyOn(mockedAuthService, 'signUp').mockResolvedValue(null);
 
-      expect(await authController.signup(ctx, signupDto)).toBeNull();
+      await expect(
+        authController.signup(ctx, signupDto),
+      ).resolves.toBeUndefined();
     });
   });
 });

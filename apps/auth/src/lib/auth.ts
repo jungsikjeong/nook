@@ -4,12 +4,18 @@ import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { oauthProvider } from '@better-auth/oauth-provider';
 import { db } from '../database/client';
 
-// 이 IdP 에 cross-origin 으로 호출 가능한 RP/UI 의 origin 목록.
-// CORS_ORIGIN (NestJS CORS 용) 과 동일한 값을 재사용해서 일치 유지.
-const trustedOrigins = (process.env.CORS_ORIGIN ?? 'http://localhost:3000')
+const authServerUrl = process.env.BETTER_AUTH_URL ?? 'http://localhost:3001';
+const authWebUrl = process.env.WEB_URL ?? 'http://localhost:3000';
+const oidcScopes = ['openid', 'profile', 'email', 'offline_access'];
+
+const corsOrigins = (process.env.CORS_ORIGIN ?? '')
   .split(',')
   .map((s) => s.trim())
   .filter(Boolean);
+
+const trustedOrigins = [
+  ...new Set([authServerUrl, authWebUrl, ...corsOrigins]),
+];
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
@@ -17,9 +23,6 @@ export const auth = betterAuth({
   }),
   trustedOrigins,
   emailAndPassword: { enabled: true },
-  silenceWarnings: {
-    oauthAuthServerConfig: true,
-  },
   disabledPaths: ['/token'],
   plugins: [
     jwt({
@@ -28,9 +31,19 @@ export const auth = betterAuth({
       },
     }),
     oauthProvider({
-      loginPage: '/signin',
-      consentPage: '/consent',
-      // ...other options
+      loginPage: `${authWebUrl}/signin`,
+      consentPage: `${authWebUrl}/consent`,
+      signup: {
+        page: `${authWebUrl}/signup`,
+      },
+      scopes: oidcScopes,
+      clientRegistrationDefaultScopes: oidcScopes,
+      clientRegistrationAllowedScopes: oidcScopes,
+      allowDynamicClientRegistration: false,
+      silenceWarnings: {
+        oauthAuthServerConfig: true,
+        openidConfig: true,
+      },
     }),
   ],
 });

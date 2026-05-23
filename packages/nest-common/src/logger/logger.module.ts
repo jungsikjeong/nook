@@ -1,8 +1,9 @@
 import {
   DynamicModule,
+  type FactoryProvider,
   Global,
   Module,
-  ModuleMetadata,
+  type ModuleMetadata,
   Type,
 } from '@nestjs/common';
 import {
@@ -23,11 +24,11 @@ export interface AppLoggerOptionsFactory {
   createLoggerOptions(): Promise<AppLoggerOptions> | AppLoggerOptions;
 }
 
-export interface AppLoggerAsyncOptions
+export interface AppLoggerAsyncOptions<TFactoryArgs extends unknown[] = unknown[]>
   extends Pick<ModuleMetadata, 'imports'> {
-  inject?: any[];
+  inject?: FactoryProvider['inject'];
   useFactory?: (
-    ...args: any[]
+    ...args: TFactoryArgs
   ) => Promise<AppLoggerOptions> | AppLoggerOptions;
   useExisting?: Type<AppLoggerOptionsFactory>;
   useClass?: Type<AppLoggerOptionsFactory>;
@@ -73,7 +74,9 @@ export class AppLoggerModule {
     };
   }
 
-  static forRootAsync(options: AppLoggerAsyncOptions): DynamicModule {
+  static forRootAsync<TFactoryArgs extends unknown[]>(
+    options: AppLoggerAsyncOptions<TFactoryArgs>,
+  ): DynamicModule {
     return {
       module: AppLoggerModule,
       global: true,
@@ -82,7 +85,7 @@ export class AppLoggerModule {
         WinstonModule.forRootAsync({
           imports: options.imports,
           inject: options.inject,
-          useFactory: async (...args: any[]) => {
+          useFactory: async (...args: TFactoryArgs) => {
             if (options.useFactory) {
               const o = await options.useFactory(...args);
               return buildWinstonOptions(o);

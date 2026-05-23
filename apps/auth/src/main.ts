@@ -9,6 +9,7 @@ import {
 } from '@better-auth/oauth-provider';
 import { toNodeHandler } from 'better-auth/node';
 import express, { type Express } from 'express';
+import { RequestIdMiddleware } from '@nook/nest-common';
 
 import { AppModule } from './app.module';
 import { auth } from './lib/auth';
@@ -18,11 +19,20 @@ async function bootstrap(): Promise<void> {
     bodyParser: false,
   });
 
-  const corsOrigin = process.env.CORS_ORIGIN ?? 'http://localhost:3000';
+  const configuredCorsOrigins = (process.env.CORS_ORIGIN ?? '')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
+  const corsOrigins = [
+    process.env.WEB_URL ?? 'http://localhost:3000',
+    ...configuredCorsOrigins,
+  ];
   app.enableCors({
-    origin: corsOrigin.split(',').map((s) => s.trim()),
+    origin: [...new Set(corsOrigins)],
     credentials: true,
   });
+
+  app.use(RequestIdMiddleware);
 
   // OIDC / OAuth 2.0 디스커버리 메타데이터.
   // issuer path가 /api/auth이므로 RFC 8414/OIDC Discovery 규칙에 맞춰

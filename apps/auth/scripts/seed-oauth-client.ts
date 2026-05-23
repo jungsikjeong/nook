@@ -59,9 +59,9 @@ const CLIENTS: ClientSeed[] = [
   {
     name: 'Nook Backend',
     redirect_uris: [
-      'http://localhost:4000/auth/callback',
+      'http://localhost:4000/api/auth/oauth2/callback/nook-auth',
       // 추후 운영 도메인 추가:
-      // 'https://api.nook.com/auth/callback',
+      // 'https://api.nook.com/api/auth/oauth2/callback/nook-auth',
     ],
     skip_consent: true, // first-party RP → consent 화면 스킵
     require_pkce: true,

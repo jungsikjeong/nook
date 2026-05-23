@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { authClient } from '@/lib/auth-client';
+import { useCurrentSearch } from '@/lib/use-current-search';
 
 export default function SignInPage() {
   const router = useRouter();
@@ -12,6 +13,7 @@ export default function SignInPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const currentSearch = useCurrentSearch();
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -89,7 +91,10 @@ export default function SignInPage() {
       </form>
       <p className='text-sm text-gray-600 text-center'>
         계정이 없으신가요?{' '}
-        <Link href='/signup' className='underline hover:text-black'>
+        <Link
+          href={`/signup${currentSearch}`}
+          className='underline hover:text-black'
+        >
           가입하기
         </Link>
       </p>

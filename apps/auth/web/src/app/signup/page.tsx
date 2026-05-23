@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { authClient } from '@/lib/auth-client';
+import { useCurrentSearch } from '@/lib/use-current-search';
 
 export default function SignUpPage() {
   const router = useRouter();
@@ -12,6 +13,7 @@ export default function SignUpPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const currentSearch = useCurrentSearch();
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -32,7 +34,8 @@ export default function SignUpPage() {
       return;
     }
 
-    const redirectUrl = (data as { url?: string; redirect?: boolean } | null)?.url;
+    const redirectUrl = (data as { url?: string; redirect?: boolean } | null)
+      ?.url;
     if (redirectUrl) {
       window.location.href = redirectUrl;
     } else {
@@ -103,7 +106,10 @@ export default function SignUpPage() {
       </form>
       <p className='text-sm text-gray-600 text-center'>
         이미 계정이 있으신가요?{' '}
-        <Link href='/signin' className='underline hover:text-black'>
+        <Link
+          href={`/signin${currentSearch}`}
+          className='underline hover:text-black'
+        >
           로그인
         </Link>
       </p>

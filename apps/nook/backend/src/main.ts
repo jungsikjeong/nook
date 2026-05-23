@@ -1,6 +1,8 @@
 import { Logger, ValidationPipe, VersioningType } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
+import { type NestExpressApplication } from '@nestjs/platform-express';
+import { toNodeHandler } from 'better-auth/node';
 import cookieParser from 'cookie-parser';
 import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 
@@ -10,22 +12,39 @@ import {
 } from '@nook/nest-common';
 
 import { AppModule } from './app.module';
+import { auth } from './lib/auth';
 
 async function bootstrap(): Promise<void> {
-  const app = await NestFactory.create(AppModule, { bufferLogs: true });
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    bufferLogs: true,
+    bodyParser: false,
+  });
   app.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER));
   const config = app.get(ConfigService);
 
-  app.use(cookieParser());
-  app.useGlobalPipes(new ValidationPipe(VALIDATION_PIPE_OPTIONS));
-  app.use(RequestIdMiddleware);
-
-  const corsOrigin =
-    config.get<string>('CORS_ORIGIN') ?? 'http://localhost:3000';
+  // CORS는 better-auth 핸들러보다 먼저 등록해야 한다.
+  // toNodeHandler가 /api/auth/* 의 preflight(OPTIONS)를 가로채기 전에
+  // cors 미들웨어가 응답 헤더를 붙이고 preflight를 처리하도록 한다.
+  const configuredCorsOrigins = (config.get<string>('CORS_ORIGIN') ?? '')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
+  const corsOrigins = [
+    process.env.WEB_URL ?? 'http://localhost:3000',
+    ...configuredCorsOrigins,
+  ];
   app.enableCors({
-    origin: corsOrigin.split(',').map((s) => s.trim()),
+    origin: [...new Set(corsOrigins)],
     credentials: true,
   });
+
+  app.use(RequestIdMiddleware);
+  app.use('/api/auth', toNodeHandler(auth));
+  app.use(cookieParser());
+  app.useBodyParser('json');
+  app.useBodyParser('urlencoded', { extended: true });
+
+  app.useGlobalPipes(new ValidationPipe(VALIDATION_PIPE_OPTIONS));
 
   // Use URI versioning, e.g., /api/v1/endpoint
   app.setGlobalPrefix('api');

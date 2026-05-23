@@ -36,7 +36,7 @@ export class AllExceptionsFilter<T> implements ExceptionFilter {
     this.logger.setContext(AllExceptionsFilter.name);
   }
 
-  catch(exception: T, host: ArgumentsHost): any {
+  catch(exception: T, host: ArgumentsHost): void {
     const ctx = host.switchToHttp();
     const req: Request = ctx.getRequest<Request>();
     const res: Response = ctx.getResponse<Response>();
@@ -46,11 +46,11 @@ export class AllExceptionsFilter<T> implements ExceptionFilter {
     const requestId = req.headers[REQUEST_ID_TOKEN_HEADER];
     const requestContext = createRequestContext(req);
 
-    let stack: any;
+    let stack: string | undefined = undefined;
     let statusCode: HttpStatus | undefined = undefined;
     let errorName: string | undefined = undefined;
     let message: string | undefined = undefined;
-    let details: string | Record<string, any> | undefined = undefined;
+    let details: unknown = undefined;
     // TODO : 헤더의 언어 값에 따라 현지화된(localized) 메시지를 반환하도록 개선 필요
     const acceptedLanguage = 'ja';
     let localizedMessage: string | undefined = undefined;

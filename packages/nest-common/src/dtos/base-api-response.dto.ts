@@ -1,6 +1,6 @@
 export class BaseApiResponse<T> {
   public data: T;
-  public meta: any;
+  public meta: unknown;
 }
 
 export class BaseApiErrorObject {
