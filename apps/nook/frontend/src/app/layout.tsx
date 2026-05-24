@@ -1,17 +1,26 @@
+import { HamburgerMenu } from '@/components/shared/menu';
+import { Toaster } from '@/components/ui/sonner';
+import { TooltipProvider } from '@/components/ui/tooltip';
 import type { Metadata } from 'next';
 import { Geist_Mono, Nanum_Pen_Script } from 'next/font/google';
 import localFont from 'next/font/local';
 import './globals.css';
-import { HamburgerMenu } from '@/components/shared/menu';
-import { TooltipProvider } from '@/components/ui/tooltip';
 
 const paperlogy = localFont({
   variable: '--font-paperlogy',
   display: 'swap',
   src: [
-    { path: './fonts/Paperlogy-4Regular.woff2', weight: '400', style: 'normal' },
+    {
+      path: './fonts/Paperlogy-4Regular.woff2',
+      weight: '400',
+      style: 'normal',
+    },
     { path: './fonts/Paperlogy-5Medium.woff2', weight: '500', style: 'normal' },
-    { path: './fonts/Paperlogy-6SemiBold.woff2', weight: '600', style: 'normal' },
+    {
+      path: './fonts/Paperlogy-6SemiBold.woff2',
+      weight: '600',
+      style: 'normal',
+    },
   ],
 });
 
@@ -49,6 +58,7 @@ export default function RootLayout({
             {children}
           </main>
         </TooltipProvider>
+        <Toaster position='top-center' />
       </body>
     </html>
   );

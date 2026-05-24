@@ -1,14 +1,14 @@
 import { relations, sql } from 'drizzle-orm';
 import { pgTable, text, timestamp } from 'drizzle-orm/pg-core';
 
-import { user } from './auth';
+import { users } from './auth';
 
 export const profiles = pgTable('profiles', {
   userId: text('user_id')
     .primaryKey()
-    .references(() => user.id, { onDelete: 'cascade' }),
+    .references(() => users.id, { onDelete: 'cascade' }),
   nickname: text('nickname').unique(),
-  profileImageUrls: text('profile_image_urls')
+  image: text('image')
     .array()
     .notNull()
     .default(sql`'{}'::text[]`),
@@ -22,9 +22,9 @@ export const profiles = pgTable('profiles', {
 });
 
 export const profilesRelations = relations(profiles, ({ one }) => ({
-  user: one(user, {
+  user: one(users, {
     fields: [profiles.userId],
-    references: [user.id],
+    references: [users.id],
   }),
 }));
 

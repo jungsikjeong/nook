@@ -29,7 +29,7 @@ export const envSchema = z.object({
     .union([z.boolean(), z.string()])
     .transform((value) => (typeof value === "boolean" ? value : value === "true"))
     .default(false),
-  CORS_ORIGIN: z.string().default("http://localhost:3000"),
+  CORS_ORIGIN: z.string().default("http://localhost:3030"),
   LOG_LEVEL: z
     .enum(["error", "warn", "info", "http", "verbose", "debug", "silly"])
     .optional(),

@@ -6,7 +6,7 @@ import { genericOAuth } from 'better-auth/plugins/generic-oauth';
 import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
 
-import { account, session, user, verification } from '@/db/schema/auth';
+import { account, session, users, verification } from '@/db/schema/auth';
 
 const providerId = process.env.OIDC_PROVIDER_ID ?? 'nook-auth';
 const port = process.env.PORT ?? '4000';
@@ -58,7 +58,7 @@ export const auth = betterAuth({
   secret: authSecret,
   database: drizzleAdapter(db, {
     provider: 'pg',
-    schema: { user, session, account, verification },
+    schema: { user: users, session, account, verification },
   }),
   trustedOrigins,
   emailAndPassword: {

@@ -3,43 +3,50 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { toast } from 'sonner';
 import { authClient } from '@/lib/auth-client';
 import { useCurrentSearch } from '@/lib/use-current-search';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+
+const schema = z.object({
+  email: z.string().email('올바른 이메일을 입력해주세요'),
+  password: z.string().min(1, '비밀번호를 입력해주세요'),
+});
+
+type FormValues = z.infer<typeof schema>;
 
 export default function SignInPage() {
   const router = useRouter();
-
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
   const currentSearch = useCurrentSearch();
+  const [loading, setLoading] = useState(false);
 
-  async function onSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setError(null);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<FormValues>({ resolver: zodResolver(schema) });
+
+  async function onSubmit(values: FormValues) {
     setLoading(true);
-
-    // oauthProviderClient 플러그인이 URL 의 서명된 oauth_query 를 자동으로
-    // 요청 body 에 첨부한다. 서버 측 before/after hook 이 그걸 받아
-    // 로그인 + authorize 이어주기를 처리하고, 응답에 redirect URL 을 돌려준다.
-    const { data, error: signInError } = await authClient.signIn.email({
-      email,
-      password,
+    const { data, error } = await authClient.signIn.email({
+      email: values.email,
+      password: values.password,
     });
     setLoading(false);
 
-    if (signInError) {
-      setError(signInError.message ?? '로그인에 실패했습니다');
+    if (error) {
+      toast.error(error.message ?? '로그인에 실패했습니다');
       return;
     }
 
-    // OIDC 흐름에서 들어왔으면 응답에 redirect URL 이 있고, 그쪽으로 보낸다.
-    // 일반 방문이면 redirect 가 없으므로 홈으로.
-    const redirectUrl = (data as { url?: string; redirect?: boolean } | null)
-      ?.url;
+    const redirectUrl = (data as { url?: string } | null)?.url;
     if (redirectUrl) {
-      window.location.href = redirectUrl;
+      window.location.assign(redirectUrl);
     } else {
       router.push('/');
     }
@@ -49,51 +56,42 @@ export default function SignInPage() {
     <div className='w-full max-w-sm bg-white rounded-2xl shadow-sm p-8 space-y-6'>
       <div>
         <h1 className='text-xl font-semibold'>로그인</h1>
-        <p className='text-sm text-gray-500 mt-1'>계정에 로그인하세요</p>
+        <p className='text-sm text-muted-foreground mt-1'>계정에 로그인하세요</p>
       </div>
-      <form onSubmit={onSubmit} className='space-y-4'>
+      <form onSubmit={handleSubmit(onSubmit)} className='space-y-4'>
         <div className='space-y-1.5'>
-          <label htmlFor='email' className='block text-sm font-medium'>
-            이메일
-          </label>
-          <input
+          <Label htmlFor='email'>이메일</Label>
+          <Input
             id='email'
             type='email'
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className='w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-black'
             autoComplete='email'
+            {...register('email')}
           />
+          {errors.email && (
+            <p className='text-xs text-destructive'>{errors.email.message}</p>
+          )}
         </div>
         <div className='space-y-1.5'>
-          <label htmlFor='password' className='block text-sm font-medium'>
-            비밀번호
-          </label>
-          <input
+          <Label htmlFor='password'>비밀번호</Label>
+          <Input
             id='password'
             type='password'
-            required
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className='w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-black'
             autoComplete='current-password'
+            {...register('password')}
           />
+          {errors.password && (
+            <p className='text-xs text-destructive'>{errors.password.message}</p>
+          )}
         </div>
-        {error && <p className='text-sm text-red-600'>{error}</p>}
-        <button
-          type='submit'
-          disabled={loading}
-          className='w-full py-2 rounded-md bg-black text-white text-sm font-medium hover:bg-gray-800 disabled:opacity-50'
-        >
+        <Button type='submit' disabled={loading} className='w-full'>
           {loading ? '로그인 중...' : '로그인'}
-        </button>
+        </Button>
       </form>
-      <p className='text-sm text-gray-600 text-center'>
+      <p className='text-sm text-muted-foreground text-center'>
         계정이 없으신가요?{' '}
         <Link
           href={`/signup${currentSearch}`}
-          className='underline hover:text-black'
+          className='underline hover:text-foreground'
         >
           가입하기
         </Link>

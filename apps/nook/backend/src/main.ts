@@ -30,7 +30,7 @@ async function bootstrap(): Promise<void> {
     .map((s) => s.trim())
     .filter(Boolean);
   const corsOrigins = [
-    process.env.WEB_URL ?? 'http://localhost:3000',
+    process.env.WEB_URL ?? 'http://localhost:3030',
     ...configuredCorsOrigins,
   ];
   app.enableCors({

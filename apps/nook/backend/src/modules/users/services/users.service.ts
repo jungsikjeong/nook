@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { desc, eq } from 'drizzle-orm';
 
 import { DATABASE, type Database } from '@/db/db.service';
-import { profiles, user, type ProfileRow, type User } from '@/db/schema';
+import { profiles, users, type ProfileRow, type User } from '@/db/schema';
 import { plainToClass } from 'class-transformer';
 import { UserResDto } from '../dto/users-res-dto';
 import { ProfileInitializationFailedError } from '../errors/profile-initialization-failed.error';
@@ -14,8 +14,8 @@ export class UsersService {
   async findById(id: string): Promise<User | null> {
     const [row] = await this.db
       .select()
-      .from(user)
-      .where(eq(user.id, id))
+      .from(users)
+      .where(eq(users.id, id))
       .limit(1);
     return row ?? null;
   }
@@ -47,24 +47,23 @@ export class UsersService {
   async findByIdWithProfile(id: string): Promise<UserResDto | null> {
     const [row] = await this.db
       .select({
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        emailVerified: user.emailVerified,
-        image: user.image,
-        role: user.role,
-        createdAt: user.createdAt,
-        updatedAt: user.updatedAt,
+        id: users.id,
+        name: users.name,
+        email: users.email,
+        emailVerified: users.emailVerified,
+        image: profiles.image ?? users.image,
+        role: users.role,
+        createdAt: users.createdAt,
+        updatedAt: users.updatedAt,
         profileUserId: profiles.userId,
         nickname: profiles.nickname,
-        profileImageUrls: profiles.profileImageUrls,
         bio: profiles.bio,
         profileCreatedAt: profiles.createdAt,
         profileUpdatedAt: profiles.updatedAt,
       })
-      .from(user)
-      .leftJoin(profiles, eq(profiles.userId, user.id))
-      .where(eq(user.id, id))
+      .from(users)
+      .leftJoin(profiles, eq(profiles.userId, users.id))
+      .where(eq(users.id, id))
       .limit(1);
 
     if (!row) {
@@ -75,7 +74,7 @@ export class UsersService {
       ? {
           userId: row.profileUserId,
           nickname: row.nickname,
-          profileImageUrls: row.profileImageUrls ?? [],
+          image: row.image ?? [],
           bio: row.bio,
           createdAt: row.profileCreatedAt ?? row.createdAt,
           updatedAt: row.profileUpdatedAt ?? row.updatedAt,
@@ -103,24 +102,23 @@ export class UsersService {
   async listAll(): Promise<UserResDto[]> {
     const rows = await this.db
       .select({
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        emailVerified: user.emailVerified,
-        image: user.image,
-        role: user.role,
-        createdAt: user.createdAt,
-        updatedAt: user.updatedAt,
+        id: users.id,
+        name: users.name,
+        email: users.email,
+        emailVerified: users.emailVerified,
+        image: profiles.image ?? users.image,
+        role: users.role,
+        createdAt: users.createdAt,
+        updatedAt: users.updatedAt,
         profileUserId: profiles.userId,
         nickname: profiles.nickname,
-        profileImageUrls: profiles.profileImageUrls,
         bio: profiles.bio,
         profileCreatedAt: profiles.createdAt,
         profileUpdatedAt: profiles.updatedAt,
       })
-      .from(user)
-      .leftJoin(profiles, eq(profiles.userId, user.id))
-      .orderBy(desc(user.createdAt));
+      .from(users)
+      .leftJoin(profiles, eq(profiles.userId, users.id))
+      .orderBy(desc(users.createdAt));
 
     return plainToClass(
       UserResDto,
@@ -138,7 +136,6 @@ export class UsersService {
           ? {
               userId: row.profileUserId,
               nickname: row.nickname,
-              profileImageUrls: row.profileImageUrls,
               bio: row.bio,
               createdAt: row.profileCreatedAt,
               updatedAt: row.profileUpdatedAt,

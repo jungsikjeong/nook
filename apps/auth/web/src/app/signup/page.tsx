@@ -3,43 +3,58 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { toast } from 'sonner';
 import { authClient } from '@/lib/auth-client';
 import { useCurrentSearch } from '@/lib/use-current-search';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+
+const schema = z.object({
+  name: z.string().min(1, '이름을 입력해주세요'),
+  email: z.string().email('올바른 이메일을 입력해주세요'),
+  password: z
+    .string()
+    .min(8, '비밀번호는 8자 이상이어야 합니다')
+    .regex(/\d/, '숫자를 포함해야 합니다')
+    .regex(/[^a-zA-Z0-9]/, '특수문자를 포함해야 합니다'),
+});
+
+type FormValues = z.infer<typeof schema>;
 
 export default function SignUpPage() {
   const router = useRouter();
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
   const currentSearch = useCurrentSearch();
+  const [loading, setLoading] = useState(false);
 
-  async function onSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setError(null);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<FormValues>({ resolver: zodResolver(schema) });
+
+  async function onSubmit(values: FormValues) {
     setLoading(true);
-
-    // oauthProviderClient 플러그인이 OIDC 흐름의 oauth_query 를 자동 첨부.
-    // 가입 시 autoSignIn=true(기본) → 세션 쿠키 발급 → after hook 이 authorize 이어주기.
-    const { data, error: signUpError } = await authClient.signUp.email({
-      email,
-      password,
-      name,
+    const { data, error } = await authClient.signUp.email({
+      email: values.email,
+      password: values.password,
+      name: values.name,
     });
     setLoading(false);
 
-    if (signUpError) {
-      setError(signUpError.message ?? '가입에 실패했습니다');
+    if (error) {
+      console.error('가입에러:', error);
+      toast.error(error.message ?? '가입에 실패했습니다');
       return;
     }
 
-    const redirectUrl = (data as { url?: string; redirect?: boolean } | null)
-      ?.url;
+    const redirectUrl = (data as { url?: string } | null)?.url;
     if (redirectUrl) {
-      window.location.href = redirectUrl;
+      window.location.assign(redirectUrl);
     } else {
-      // 일반 가입: 로그인 화면으로 (autoSignIn 이 꺼져있는 경우 대비)
       router.push('/signin');
     }
   }
@@ -48,67 +63,62 @@ export default function SignUpPage() {
     <div className='w-full max-w-sm bg-white rounded-2xl shadow-sm p-8 space-y-6'>
       <div>
         <h1 className='text-xl font-semibold'>회원가입</h1>
-        <p className='text-sm text-gray-500 mt-1'>새 계정을 만들어보세요</p>
+        <p className='text-sm text-muted-foreground mt-1'>
+          새 계정을 만들어보세요
+        </p>
       </div>
-      <form onSubmit={onSubmit} className='space-y-4'>
+      <form onSubmit={handleSubmit(onSubmit)} className='space-y-4'>
         <div className='space-y-1.5'>
-          <label htmlFor='name' className='block text-sm font-medium'>
-            이름
-          </label>
-          <input
+          <Label htmlFor='name'>이름</Label>
+          <Input
             id='name'
             type='text'
-            required
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className='w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-black'
             autoComplete='name'
+            {...register('name')}
           />
+          {errors.name && (
+            <p className='text-xs text-destructive'>{errors.name.message}</p>
+          )}
         </div>
         <div className='space-y-1.5'>
-          <label htmlFor='email' className='block text-sm font-medium'>
-            이메일
-          </label>
-          <input
+          <Label htmlFor='email'>이메일</Label>
+          <Input
             id='email'
             type='email'
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className='w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-black'
             autoComplete='email'
+            {...register('email')}
           />
+          {errors.email && (
+            <p className='text-xs text-destructive'>{errors.email.message}</p>
+          )}
         </div>
         <div className='space-y-1.5'>
-          <label htmlFor='password' className='block text-sm font-medium'>
-            비밀번호
-          </label>
-          <input
+          <Label htmlFor='password'>비밀번호</Label>
+          <Input
             id='password'
             type='password'
-            required
-            minLength={8}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className='w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-black'
             autoComplete='new-password'
+            {...register('password')}
           />
-          <p className='text-xs text-gray-500'>최소 8자 이상</p>
+          {errors.password ? (
+            <p className='text-xs text-destructive'>
+              {errors.password.message}
+            </p>
+          ) : (
+            <p className='text-xs text-muted-foreground'>
+              숫자·특수문자 포함 8자 이상
+            </p>
+          )}
         </div>
-        {error && <p className='text-sm text-red-600'>{error}</p>}
-        <button
-          type='submit'
-          disabled={loading}
-          className='w-full py-2 rounded-md bg-black text-white text-sm font-medium hover:bg-gray-800 disabled:opacity-50'
-        >
+        <Button type='submit' disabled={loading} className='w-full'>
           {loading ? '가입 중...' : '가입하기'}
-        </button>
+        </Button>
       </form>
-      <p className='text-sm text-gray-600 text-center'>
+      <p className='text-sm text-muted-foreground text-center'>
         이미 계정이 있으신가요?{' '}
         <Link
           href={`/signin${currentSearch}`}
-          className='underline hover:text-black'
+          className='underline hover:text-foreground'
         >
           로그인
         </Link>
