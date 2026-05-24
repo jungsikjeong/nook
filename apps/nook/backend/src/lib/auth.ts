@@ -74,7 +74,7 @@ export const auth = betterAuth({
           discoveryUrl,
           issuer: oidcIssuer,
           requireIssuerValidation: true,
-          scopes: ['openid', 'email', 'profile'],
+          scopes: ['openid', 'email', 'profile', 'offline_access'],
           pkce: true,
           overrideUserInfo: true,
         },

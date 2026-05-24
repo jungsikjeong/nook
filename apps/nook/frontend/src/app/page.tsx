@@ -6,8 +6,8 @@ export default function Home() {
   return (
     <>
       <LoginBtn />
-      {/* <Character /> */}
-      {/* <BottomMenu /> */}
+      <Character />
+      <BottomMenu />
     </>
   );
 }

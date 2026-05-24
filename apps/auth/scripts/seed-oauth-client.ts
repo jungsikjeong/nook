@@ -29,6 +29,12 @@
  *       { name: 'Studio Backend', redirect_uris: [':5001/cb', 'https://api.studio.com/cb'] },
  *     ]
  *
+ *   redirect_uris 는 OAuth 로그인 callback URL, post_logout_redirect_uris 는
+ *   로그아웃 완료 후 브라우저가 돌아갈 URL 이다. 여러 URL 은 콤마로 구분한다.
+ *
+ *     NOOK_OAUTH_CALLBACK_URIS=http://localhost:4000/cb,https://api.nook.com/cb
+ *     NOOK_POST_LOGOUT_REDIRECT_URIS=http://localhost:3030,https://nook.com
+ *
  *   ❌ BAD — 한 client 에 여러 서비스 URL 을 몰아넣음:
  *     { name: 'All Services', redirect_uris: [':4000/cb', ':5001/cb', ':6000/cb'] }
  *     → 모든 서비스가 같은 client_secret 공유 → 한 곳 침해 시 도미노
@@ -47,6 +53,8 @@ interface ClientSeed {
   redirect_uris: string[];
   skip_consent?: boolean;
   require_pkce?: boolean;
+  enable_end_session?: boolean;
+  post_logout_redirect_uris?: string[];
   token_endpoint_auth_method?:
     | 'client_secret_post'
     | 'client_secret_basic'
@@ -54,24 +62,47 @@ interface ClientSeed {
   type?: 'web' | 'native' | 'user-agent-based';
 }
 
+function readUrlListEnv(name: string, fallback: string[]): string[] {
+  const raw = process.env[name];
+
+  if (!raw) {
+    return fallback;
+  }
+
+  return raw
+    .split(',')
+    .map((url) => url.trim())
+    .filter(Boolean);
+}
+
 // 등록할 OAuth client 목록. 새 서비스 추가 시 여기에 새 항목 push.
 const CLIENTS: ClientSeed[] = [
   {
     name: 'Nook Backend',
-    redirect_uris: [
+    redirect_uris: readUrlListEnv('NOOK_OAUTH_CALLBACK_URIS', [
       'http://localhost:4000/api/auth/oauth2/callback/nook-auth',
-      // 추후 운영 도메인 추가:
-      // 'https://api.nook.com/api/auth/oauth2/callback/nook-auth',
-    ],
+    ]),
     skip_consent: true, // first-party RP → consent 화면 스킵
     require_pkce: true,
+    enable_end_session: true,
+    post_logout_redirect_uris: readUrlListEnv(
+      'NOOK_POST_LOGOUT_REDIRECT_URIS',
+      ['http://localhost:3030'],
+    ),
   },
   // 새 서비스가 생기면 client 를 추가:
   // {
   //   name: 'Studio Backend',
-  //   redirect_uris: ['http://localhost:5001/auth/callback'],
+  //   redirect_uris: readUrlListEnv('STUDIO_OAUTH_CALLBACK_URIS', [
+  //     'http://localhost:5001/auth/callback',
+  //   ]),
   //   skip_consent: true,
   //   require_pkce: true,
+  //   enable_end_session: true,
+  //   post_logout_redirect_uris: readUrlListEnv(
+  //     'STUDIO_POST_LOGOUT_REDIRECT_URIS',
+  //     ['http://localhost:3031'],
+  //   ),
   // },
   // 외부 파트너용 (consent 화면을 사용자에게 보여줘야 함):
   // {
@@ -86,6 +117,33 @@ const SEED_EMAIL = 'seed-admin@nook.local';
 const SEED_PASSWORD =
   process.env.SEED_ADMIN_PASSWORD ?? 'seed-admin-password-change-me';
 const SEED_NAME = 'Seed Admin';
+
+async function applyClientLogoutConfig(
+  clientId: string,
+  cfg: ClientSeed,
+): Promise<void> {
+  const updates = {
+    ...(cfg.enable_end_session !== undefined
+      ? { enableEndSession: cfg.enable_end_session }
+      : {}),
+    ...(cfg.post_logout_redirect_uris !== undefined
+      ? { postLogoutRedirectUris: cfg.post_logout_redirect_uris }
+      : {}),
+    updatedAt: new Date(),
+  };
+
+  if (
+    cfg.enable_end_session === undefined &&
+    cfg.post_logout_redirect_uris === undefined
+  ) {
+    return;
+  }
+
+  await db
+    .update(oauthClient)
+    .set(updates)
+    .where(eq(oauthClient.clientId, clientId));
+}
 
 async function ensureSeedUserSessionCookie(): Promise<string> {
   // 가입 시도. 이미 존재하면 better-auth 가 USER_ALREADY_EXISTS 류 에러를 던지므로 삼킨다.
@@ -125,11 +183,15 @@ async function seedOne(cfg: ClientSeed, cookie: string): Promise<void> {
     .limit(1);
 
   if (existing) {
+    await applyClientLogoutConfig(existing.clientId, cfg);
     console.log(`\n[skip] "${cfg.name}" 은 이미 등록되어 있습니다.`);
     console.log({
       client_id: existing.clientId,
       redirect_uris: existing.redirectUris,
       skip_consent: existing.skipConsent,
+      enable_end_session: cfg.enable_end_session ?? existing.enableEndSession,
+      post_logout_redirect_uris:
+        cfg.post_logout_redirect_uris ?? existing.postLogoutRedirectUris,
     });
     return;
   }
@@ -148,6 +210,8 @@ async function seedOne(cfg: ClientSeed, cookie: string): Promise<void> {
     },
     headers: new Headers({ cookie }),
   });
+
+  await applyClientLogoutConfig(created.client_id, cfg);
 
   console.log(`\n[created] "${cfg.name}" ===`);
   console.log(`  client_id     = ${created.client_id}`);

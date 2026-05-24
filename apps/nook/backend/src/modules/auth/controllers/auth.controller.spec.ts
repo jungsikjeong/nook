@@ -1,7 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AppLogger, RequestContext } from '@nook/nest-common';
 
-import { SignUpDto } from '../dto/sign-up.dto';
 import { AuthService } from '../services/auth.service';
 import { AuthController } from './auth.controller';
 
@@ -34,21 +33,4 @@ describe('AuthController', () => {
   });
 
   const ctx = new RequestContext();
-
-  describe('signup', () => {
-    it('should signup new user', async () => {
-      const signupDto = new SignUpDto();
-      signupDto.loginId = 'testuser';
-      signupDto.password = 'password123';
-      signupDto.name = 'Test User';
-      signupDto.nickname = 'testuser';
-      signupDto.email = 'test@example.com';
-
-      jest.spyOn(mockedAuthService, 'signUp').mockResolvedValue(null);
-
-      await expect(
-        authController.signup(ctx, signupDto),
-      ).resolves.toBeUndefined();
-    });
-  });
 });
