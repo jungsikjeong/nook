@@ -8,15 +8,9 @@ export default async function CallbackPage({ searchParams }: Props) {
 
   const me = await getMe();
 
-  console.log('me:', me);
-
-  // if (!me) {
-  //   redirect('/');
-  // }
-
-  // if (!me.profile?.nickname) {
-  //   redirect(getOnboardingPath(redirectTo));
-  // }
+  if (!me || !me.profile?.nickname) {
+    redirect(`/onboarding/${redirect_to}`);
+  }
 
   redirect((redirect_to as string) ?? '/');
 }
