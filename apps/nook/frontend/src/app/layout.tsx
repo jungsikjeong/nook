@@ -1,4 +1,4 @@
-import { HamburgerMenu } from '@/components/shared/menu';
+import { LoginButton } from '@/components/shared/buttons';
 import { Toaster } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import type { Metadata } from 'next';
@@ -51,10 +51,10 @@ export default function RootLayout({
       lang='en'
       className={`${paperlogy.variable} ${geistMono.variable} ${nanumPen.variable} antialiased`}
     >
-      <body className='min-h-dvh bg-[#dbe7d8] md:bg-[#f3f3f3] md:flex md:items-center md:justify-center md:px-6'>
+      <body className='min-h-dvh bg-[#dbe7d8] md:bg-[#f3f3f3] md:flex md:items-center md:justify-center md:px-6 '>
         <TooltipProvider delay={200}>
-          <main className='relative min-h-dvh w-full bg-[#dbe7d8] overflow-hidden md:min-h-0 md:h-180 md:max-w-310 md:rounded-[32px]'>
-            <HamburgerMenu />
+          <main className='relative min-h-dvh w-full bg-[#dbe7d8] overflow-hidden md:min-h-0 md:h-180 md:max-w-310 md:rounded-[32px] '>
+            <LoginButton />
             {children}
           </main>
         </TooltipProvider>

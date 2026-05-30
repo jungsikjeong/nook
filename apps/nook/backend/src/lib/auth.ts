@@ -36,6 +36,8 @@ if (!clientSecret) {
   throw new Error('OIDC_CLIENT_SECRET is not set');
 }
 
+const frontendUrl = process.env.FRONTEND_URL ?? 'http://localhost:3030';
+
 const trustedOrigins = [
   ...new Set([
     rpBaseUrl,
@@ -61,6 +63,9 @@ export const auth = betterAuth({
     schema: { user: users, session, account, verification },
   }),
   trustedOrigins,
+  onAPIError: {
+    errorURL: `${frontendUrl}/auth/error`,
+  },
   emailAndPassword: {
     enabled: false,
   },
