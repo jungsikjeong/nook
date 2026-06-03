@@ -12,7 +12,7 @@ export const profiles = pgTable('profiles', {
     .array()
     .notNull()
     .default(sql`'{}'::text[]`),
-  bio: text('bio'),
+  bio: varchar({ length: 160 }),
   createdAt: timestamp('created_at', { withTimezone: true })
     .notNull()
     .defaultNow(),

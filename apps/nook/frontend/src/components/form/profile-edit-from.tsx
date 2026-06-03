@@ -1,7 +1,7 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Controller, useForm } from 'react-hook-form';
+import { Controller, useForm, useFormState, useWatch } from 'react-hook-form';
 import { toast } from 'sonner';
 import * as z from 'zod';
 
@@ -38,7 +38,7 @@ const profileSchema = z.object({
     .string()
     .min(2, '닉네임은 2자 이상이어야 합니다.')
     .max(20, '닉네임은 20자 이하여야 합니다.'),
-  bio: z.string().max(160, '소개는 160자 이하여야 합니다.'),
+  bio: z.string().max(160, '소갯말은 160자 이하여야 합니다.'),
 });
 
 export type ProfileFormValues = z.infer<typeof profileSchema>;
@@ -52,7 +52,6 @@ export function ProfileEditForm({ mode = 'edit' }: Props) {
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
-    // TODO: 기존 프로필 값으로 초기화
     defaultValues: {
       avatar: '',
       nickname: '',
@@ -72,11 +71,17 @@ export function ProfileEditForm({ mode = 'edit' }: Props) {
       // 온보딩에서 취소 → 랜덤 닉네임으로 등록하고 진행
       const randomNickname = generateRandomNickname();
       onSubmit({ ...form.getValues(), nickname: randomNickname });
-      return;
+    }
+
+    if (mode === 'edit') {
+      // TODO
     }
 
     form.reset();
+    return;
   };
+
+  const bio = useWatch({ control: form.control, name: 'bio' });
 
   return (
     <Card className='w-full sm:max-w-md'>
@@ -131,12 +136,17 @@ export function ProfileEditForm({ mode = 'edit' }: Props) {
                       id='profile-edit-bio'
                       placeholder='자신을 간단히 소개해보세요.'
                       rows={5}
-                      className='min-h-24 resize-none'
+                      className='max-h-24 min-h-24 resize-none overflow-auto'
                       aria-invalid={fieldState.invalid}
                     />
                     <InputGroupAddon align='block-end'>
                       <InputGroupText className='tabular-nums'>
-                        {field.value.length}/160
+                        <span
+                          className={`${bio?.length > 160 ? 'text-destructive' : ''}`}
+                        >
+                          {field.value.length}
+                        </span>
+                        /160
                       </InputGroupText>
                     </InputGroupAddon>
                   </InputGroup>
@@ -151,15 +161,20 @@ export function ProfileEditForm({ mode = 'edit' }: Props) {
       </CardContent>
 
       <CardFooter>
-        <Field orientation='horizontal'>
+        <Field orientation='horizontal' className='gap-3'>
           <Button
             type='button'
             variant='outline'
+            className='h-11 flex-1'
             onClick={() => handleCancel()}
           >
             취소
           </Button>
-          <Button type='submit' form='profile-edit-form'>
+          <Button
+            type='submit'
+            form='profile-edit-form'
+            className='h-11 flex-1'
+          >
             저장
           </Button>
         </Field>
