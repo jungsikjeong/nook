@@ -113,7 +113,7 @@ const CLIENTS: ClientSeed[] = [
   // },
 ];
 
-const SEED_EMAIL = 'seed-admin@nook.local';
+const SEED_EMAIL = 'admin@local.com';
 const SEED_PASSWORD =
   process.env.SEED_ADMIN_PASSWORD ?? 'seed-admin-password-change-me';
 const SEED_NAME = 'Seed Admin';

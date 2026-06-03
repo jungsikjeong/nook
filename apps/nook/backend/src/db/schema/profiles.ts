@@ -1,5 +1,5 @@
 import { relations, sql } from 'drizzle-orm';
-import { pgTable, text, timestamp } from 'drizzle-orm/pg-core';
+import { pgTable, text, timestamp, varchar } from 'drizzle-orm/pg-core';
 
 import { users } from './auth';
 
@@ -7,7 +7,7 @@ export const profiles = pgTable('profiles', {
   userId: text('user_id')
     .primaryKey()
     .references(() => users.id, { onDelete: 'cascade' }),
-  nickname: text('nickname').unique(),
+  nickname: varchar('nickname', { length: 20 }).unique(),
   image: text('image')
     .array()
     .notNull()
@@ -19,7 +19,8 @@ export const profiles = pgTable('profiles', {
   updatedAt: timestamp('updated_at', { withTimezone: true })
     .notNull()
     .defaultNow(),
-});
+  },
+);
 
 export const profilesRelations = relations(profiles, ({ one }) => ({
   user: one(users, {

@@ -1,6 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
+import { Spinner } from '@/components/ui/spinner';
 import { authClient } from '@/lib/auth-client';
 import { toast } from 'sonner';
 
@@ -21,11 +22,6 @@ export function LoginButton() {
 
   const handleLogin = async () => {
     if (!isUser) {
-      // const { error } = await authClient.signIn.oauth2({
-      //   providerId: 'nook-auth',
-      //   callbackURL: getAuthCallbackURL(),
-      // });
-
       const res = await authClient.signIn.oauth2({
         providerId: 'nook-auth',
         callbackURL: getAuthCallbackURL(),
@@ -47,10 +43,25 @@ export function LoginButton() {
     }
   };
 
+  const LoginButtonText = () => {
+    if (isPending) {
+      return <Spinner className='w-4 h-4' />;
+    }
+
+    if (isUser) return '로그아웃';
+
+    if (!isUser) return '로그인';
+  };
+
   return (
     <div className='flex justify-end p-4'>
-      <Button onClick={handleLogin} className='cursor-pointer'>
-        {isUser ? '로그아웃' : '로그인'}
+      <Button
+        onClick={handleLogin}
+        className='cursor-pointer min-w-20 '
+        disabled={!!isPending}
+        variant='outline'
+      >
+        {LoginButtonText()}
       </Button>
     </div>
   );

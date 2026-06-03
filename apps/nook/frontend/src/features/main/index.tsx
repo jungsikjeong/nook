@@ -10,8 +10,8 @@ export function Main() {
         <span className='text-3xl'>공간 :)</span>
       </p>
 
-      {/* <Character /> */}
-      {/* <BottomMenu /> */}
+      <Character />
+      <BottomMenu />
     </>
   );
 }
