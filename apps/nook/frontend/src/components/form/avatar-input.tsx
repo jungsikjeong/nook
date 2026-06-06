@@ -7,7 +7,7 @@ import {
 import Image from 'next/image';
 import type { ControllerRenderProps } from 'react-hook-form';
 
-import type { ProfileFormValues } from './profile-edit-from';
+import type { ProfileFormValues } from './profile-edit-form';
 
 type AvatarInputProps = ControllerRenderProps<ProfileFormValues, 'avatar'>;
 

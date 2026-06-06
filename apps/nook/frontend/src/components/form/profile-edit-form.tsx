@@ -1,7 +1,7 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Controller, useForm, useFormState, useWatch } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import * as z from 'zod';
 
@@ -77,17 +77,20 @@ export function ProfileEditForm({ mode = 'edit' }: Props) {
       // TODO
     }
 
-    form.reset();
     return;
   };
 
-  const bio = useWatch({ control: form.control, name: 'bio' });
+  const title = mode === 'onboarding' ? '프로필 설정' : '프로필 수정';
+  const description =
+    mode === 'onboarding'
+      ? '닉네임과 소갯말을 설정해주세요'
+      : '닉네임 또는 소갯말을 수정 할 수 있어요.';
 
   return (
     <Card className='w-full sm:max-w-md'>
       <CardHeader>
-        <CardTitle>프로필 수정</CardTitle>
-        <CardDescription>닉네임과 소개를 설정할 수 있어요.</CardDescription>
+        <CardTitle>{title}</CardTitle>
+        <CardDescription>{description}</CardDescription>
       </CardHeader>
 
       <CardContent className='flex flex-col gap-6'>
@@ -142,7 +145,7 @@ export function ProfileEditForm({ mode = 'edit' }: Props) {
                     <InputGroupAddon align='block-end'>
                       <InputGroupText className='tabular-nums'>
                         <span
-                          className={`${bio?.length > 160 ? 'text-destructive' : ''}`}
+                          className={`${field.value.length > 160 ? 'text-destructive' : ''}`}
                         >
                           {field.value.length}
                         </span>

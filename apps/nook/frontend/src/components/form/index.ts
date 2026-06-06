@@ -1,1 +1,1 @@
-export * from './profile-edit-from';
+export * from './profile-edit-form';
