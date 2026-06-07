@@ -5,6 +5,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { validateEnv } from './config/env.validation';
 import { DbModule } from './db/db.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { UsersController } from './modules/users/controllers/users.controller';
 import { UsersModule } from './modules/users/users.module';
 import { BetterAuthGuard } from './shared/guards/better-auth.guard';
 import { RolesGuard } from './shared/guards/roles.guard';
@@ -26,5 +27,6 @@ import { SharedModule } from './shared/shared.module';
     { provide: APP_GUARD, useClass: BetterAuthGuard },
     { provide: APP_GUARD, useClass: RolesGuard },
   ],
+  controllers: [UsersController],
 })
 export class AppModule {}

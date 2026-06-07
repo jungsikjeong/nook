@@ -6,10 +6,7 @@ import {
   type ModuleMetadata,
   Type,
 } from '@nestjs/common';
-import {
-  utilities as nestWinstonUtilities,
-  WinstonModule,
-} from 'nest-winston';
+import { utilities as nestWinstonUtilities, WinstonModule } from 'nest-winston';
 import * as winston from 'winston';
 
 import { AppLogger } from './logger.service';
@@ -24,8 +21,9 @@ export interface AppLoggerOptionsFactory {
   createLoggerOptions(): Promise<AppLoggerOptions> | AppLoggerOptions;
 }
 
-export interface AppLoggerAsyncOptions<TFactoryArgs extends unknown[] = unknown[]>
-  extends Pick<ModuleMetadata, 'imports'> {
+export interface AppLoggerAsyncOptions<
+  TFactoryArgs extends unknown[] = unknown[],
+> extends Pick<ModuleMetadata, 'imports'> {
   inject?: FactoryProvider['inject'];
   useFactory?: (
     ...args: TFactoryArgs

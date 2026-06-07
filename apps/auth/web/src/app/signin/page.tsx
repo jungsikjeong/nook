@@ -22,12 +22,16 @@ const ERROR_MESSAGES: Record<string, string> = {
   'Invalid password': '비밀번호가 올바르지 않습니다.',
   'Email not verified': '이메일 인증이 완료되지 않았습니다.',
   'User not found': '이메일 또는 비밀번호가 올바르지 않습니다.',
-  'Failed to create session': '로그인 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.',
+  'Failed to create session':
+    '로그인 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.',
 };
 
 function getErrorMessage(message?: string): string {
   if (!message) return '로그인에 실패했습니다. 잠시 후 다시 시도해주세요.';
-  return ERROR_MESSAGES[message] ?? '로그인에 실패했습니다. 잠시 후 다시 시도해주세요.';
+  return (
+    ERROR_MESSAGES[message] ??
+    '로그인에 실패했습니다. 잠시 후 다시 시도해주세요.'
+  );
 }
 
 function getSavedEmail(): string {
@@ -86,62 +90,62 @@ export default function SignInPage() {
   }
 
   return (
-    <div className='w-full max-w-sm bg-white rounded-2xl shadow-sm p-8 space-y-6'>
+    <div className="w-full max-w-sm bg-white rounded-2xl shadow-sm p-8 space-y-6">
       <div>
-        <h1 className='text-xl font-semibold'>로그인</h1>
-        <p className='text-sm text-muted-foreground mt-1'>
+        <h1 className="text-xl font-semibold">로그인</h1>
+        <p className="text-sm text-muted-foreground mt-1">
           계정에 로그인하세요
         </p>
       </div>
-      <form onSubmit={handleSubmit(onSubmit)} className='space-y-4'>
-        <div className='space-y-1.5'>
-          <Label htmlFor='email'>이메일</Label>
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <div className="space-y-1.5">
+          <Label htmlFor="email">이메일</Label>
           <Input
-            id='email'
-            type='email'
-            autoComplete='email'
+            id="email"
+            type="email"
+            autoComplete="email"
             {...register('email')}
           />
           {errors.email && (
-            <p className='text-xs text-destructive'>{errors.email.message}</p>
+            <p className="text-xs text-destructive">{errors.email.message}</p>
           )}
         </div>
-        <div className='space-y-1.5'>
-          <Label htmlFor='password'>비밀번호</Label>
+        <div className="space-y-1.5">
+          <Label htmlFor="password">비밀번호</Label>
           <Input
-            id='password'
-            type='password'
-            autoComplete='current-password'
+            id="password"
+            type="password"
+            autoComplete="current-password"
             {...register('password')}
           />
           {errors.password && (
-            <p className='text-xs text-destructive'>
+            <p className="text-xs text-destructive">
               {errors.password.message}
             </p>
           )}
         </div>
-        <div className='flex items-center gap-2'>
+        <div className="flex items-center gap-2">
           <Checkbox
-            id='save-email'
+            id="save-email"
             checked={saveEmail}
             onCheckedChange={(checked) => setSaveEmail(checked === true)}
           />
           <Label
-            htmlFor='save-email'
-            className='text-sm font-normal cursor-pointer'
+            htmlFor="save-email"
+            className="text-sm font-normal cursor-pointer"
           >
             이메일 저장
           </Label>
         </div>
-        <Button type='submit' disabled={loading} className='w-full'>
+        <Button type="submit" disabled={loading} className="w-full">
           {loading ? '로그인 중...' : '로그인'}
         </Button>
       </form>
-      <p className='text-sm text-muted-foreground text-center'>
+      <p className="text-sm text-muted-foreground text-center">
         계정이 없으신가요?{' '}
         <Link
           href={`/signup${currentSearch}`}
-          className='underline hover:text-foreground'
+          className="underline hover:text-foreground"
         >
           가입하기
         </Link>

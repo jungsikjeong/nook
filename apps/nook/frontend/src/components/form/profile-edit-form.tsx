@@ -31,6 +31,7 @@ import {
 import { generateRandomNickname } from '@/lib/utils/generate-random-nickname';
 import { useRouter } from 'next/navigation';
 import { AvatarInput } from './avatar-input';
+import { authClient } from '@/lib/auth-client';
 
 const profileSchema = z.object({
   avatar: z.string().optional(),
@@ -48,6 +49,9 @@ type Props = {
 };
 
 export function ProfileEditForm({ mode = 'edit' }: Props) {
+  const { data: session, isPending } = authClient.useSession();
+  console.log(session);
+
   const router = useRouter();
 
   const form = useForm<ProfileFormValues>({

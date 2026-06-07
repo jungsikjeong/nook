@@ -70,7 +70,9 @@ async function main(): Promise<void> {
   console.log(forgedToken);
   console.log('\n검증 방법:');
   console.log('  curl http://localhost:3001/api/auth/jwks  ← 진짜 IdP 공개키');
-  console.log('  jwt.io 의 verify signature 에 그 공개키 넣어보면 valid 라고 표시됨.');
+  console.log(
+    '  jwt.io 의 verify signature 에 그 공개키 넣어보면 valid 라고 표시됨.',
+  );
   console.log('  → IdP 자기 자신도 "내가 발급한 토큰" 으로 인식.\n');
 }
 

@@ -1,31 +1,27 @@
-import { Controller, Get, NotFoundException } from '@nestjs/common';
-import { Role, Roles } from '@nook/nest-common';
-
+import { User } from '@/db/schema';
 import {
-  type AuthenticatedUser,
+  AuthenticatedUser,
   CurrentUser,
 } from '@/shared/decorators/current-user.decorator';
-
-import { UserResDto } from '../dto/users-res-dto';
+import { Controller, Get } from '@nestjs/common';
+import { NotFoundError } from '@nook/nest-common';
 import { UsersService } from '../services/users.service';
 
 @Controller('users')
 export class UsersController {
-  constructor(private readonly users: UsersService) {}
+  constructor(private readonly usersService: UsersService) {}
 
   @Get('me')
-  async me(@CurrentUser() current: AuthenticatedUser): Promise<UserResDto> {
-    const user = await this.users.findByIdWithProfile(current.sub);
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
+  async findById(@CurrentUser() user: AuthenticatedUser): Promise<User> {
+    const userInfo = await this.usersService.findById(user.sub);
 
-    return user;
+    if (!userInfo) throw new NotFoundError('User not found');
+
+    return userInfo;
   }
 
-  @Get()
-  @Roles(Role.ADMIN)
-  async list(): Promise<UserResDto[]> {
-    return await this.users.listAll();
+  @Get('me/profile')
+  async getProfile(@CurrentUser() user: AuthenticatedUser) {
+    return await this.usersService.getProfileByUserId(user.sub);
   }
 }

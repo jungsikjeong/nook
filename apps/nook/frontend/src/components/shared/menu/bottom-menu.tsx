@@ -8,14 +8,19 @@ import {
 } from '@/components/ui/tooltip';
 
 const items = [
-  { src: '/projects.png', alt: 'projects', href: '/projects', label: '프로젝트' },
+  {
+    src: '/projects.png',
+    alt: 'projects',
+    href: '/projects',
+    label: '프로젝트',
+  },
   { src: '/folder.png', alt: 'folder', href: '/folder', label: '폴더' },
   { src: '/memo.png', alt: 'memo', href: '/memo', label: '메모' },
 ] as const;
 
 export function BottomMenu() {
   return (
-    <div className='absolute left-1/2 bottom-8 -translate-x-1/2 flex items-start gap-5 md:bottom-10 md:gap-7'>
+    <div className='absolute bottom-8 left-1/2 flex -translate-x-1/2 items-start gap-5 md:bottom-10 md:gap-7'>
       {items.map((item) => (
         <MenuItem key={item.href} {...item} />
       ))}
@@ -38,7 +43,7 @@ function MenuItem({ src, alt, href, label }: MenuItemProps) {
           <Link
             href={href}
             aria-label={label}
-            className='relative w-18 h-18 rounded-[18px] overflow-hidden cursor-pointer transition-transform duration-200 hover:scale-105 md:w-23 md:h-23 md:rounded-[24px]'
+            className='relative h-18 w-18 cursor-pointer overflow-hidden rounded-[18px] transition-transform duration-200 hover:scale-105 md:h-23 md:w-23 md:rounded-[24px]'
           >
             <Image
               src={src}

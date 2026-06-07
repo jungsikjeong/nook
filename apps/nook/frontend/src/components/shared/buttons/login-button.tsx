@@ -45,7 +45,7 @@ export function LoginButton() {
 
   const LoginButtonText = () => {
     if (isPending) {
-      return <Spinner className='w-4 h-4' />;
+      return <Spinner className='h-4 w-4' />;
     }
 
     if (isUser) return '로그아웃';
@@ -57,7 +57,7 @@ export function LoginButton() {
     <div className='flex justify-end p-4'>
       <Button
         onClick={handleLogin}
-        className='cursor-pointer min-w-20 '
+        className='min-w-20 cursor-pointer'
         disabled={!!isPending}
         variant='outline'
       >

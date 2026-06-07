@@ -56,8 +56,6 @@ export class BetterAuthGuard implements CanActivate {
       throw new UnauthorizedException('Authentication required');
     }
 
-    await this.users.ensureProfile(sessionUser.id);
-
     request.user = {
       id: sessionUser.id,
       sub: sessionUser.id,

@@ -60,65 +60,65 @@ export default function SignUpPage() {
   }
 
   return (
-    <div className='w-full max-w-sm bg-white rounded-2xl shadow-sm p-8 space-y-6'>
+    <div className="w-full max-w-sm bg-white rounded-2xl shadow-sm p-8 space-y-6">
       <div>
-        <h1 className='text-xl font-semibold'>회원가입</h1>
-        <p className='text-sm text-muted-foreground mt-1'>
+        <h1 className="text-xl font-semibold">회원가입</h1>
+        <p className="text-sm text-muted-foreground mt-1">
           새 계정을 만들어보세요
         </p>
       </div>
-      <form onSubmit={handleSubmit(onSubmit)} className='space-y-4'>
-        <div className='space-y-1.5'>
-          <Label htmlFor='name'>이름</Label>
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <div className="space-y-1.5">
+          <Label htmlFor="name">이름</Label>
           <Input
-            id='name'
-            type='text'
-            autoComplete='name'
+            id="name"
+            type="text"
+            autoComplete="name"
             {...register('name')}
           />
           {errors.name && (
-            <p className='text-xs text-destructive'>{errors.name.message}</p>
+            <p className="text-xs text-destructive">{errors.name.message}</p>
           )}
         </div>
-        <div className='space-y-1.5'>
-          <Label htmlFor='email'>이메일</Label>
+        <div className="space-y-1.5">
+          <Label htmlFor="email">이메일</Label>
           <Input
-            id='email'
-            type='email'
-            autoComplete='email'
+            id="email"
+            type="email"
+            autoComplete="email"
             {...register('email')}
           />
           {errors.email && (
-            <p className='text-xs text-destructive'>{errors.email.message}</p>
+            <p className="text-xs text-destructive">{errors.email.message}</p>
           )}
         </div>
-        <div className='space-y-1.5'>
-          <Label htmlFor='password'>비밀번호</Label>
+        <div className="space-y-1.5">
+          <Label htmlFor="password">비밀번호</Label>
           <Input
-            id='password'
-            type='password'
-            autoComplete='new-password'
+            id="password"
+            type="password"
+            autoComplete="new-password"
             {...register('password')}
           />
           {errors.password ? (
-            <p className='text-xs text-destructive'>
+            <p className="text-xs text-destructive">
               {errors.password.message}
             </p>
           ) : (
-            <p className='text-xs text-muted-foreground'>
+            <p className="text-xs text-muted-foreground">
               숫자·특수문자 포함 8자 이상
             </p>
           )}
         </div>
-        <Button type='submit' disabled={loading} className='w-full'>
+        <Button type="submit" disabled={loading} className="w-full">
           {loading ? '가입 중...' : '가입하기'}
         </Button>
       </form>
-      <p className='text-sm text-muted-foreground text-center'>
+      <p className="text-sm text-muted-foreground text-center">
         이미 계정이 있으신가요?{' '}
         <Link
           href={`/signin${currentSearch}`}
-          className='underline hover:text-foreground'
+          className="underline hover:text-foreground"
         >
           로그인
         </Link>

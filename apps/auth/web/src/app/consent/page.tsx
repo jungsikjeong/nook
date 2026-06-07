@@ -24,7 +24,11 @@ export default function ConsentPage() {
   }, [currentSearch]);
 
   const scopes = useMemo(
-    () => scope.split(' ').map((s) => s.trim()).filter(Boolean),
+    () =>
+      scope
+        .split(' ')
+        .map((s) => s.trim())
+        .filter(Boolean),
     [scope],
   );
 
@@ -51,57 +55,57 @@ export default function ConsentPage() {
   }
 
   return (
-    <div className='w-full max-w-sm bg-white rounded-2xl shadow-sm p-8 space-y-6'>
+    <div className="w-full max-w-sm bg-white rounded-2xl shadow-sm p-8 space-y-6">
       <div>
-        <h1 className='text-xl font-semibold'>권한 승인</h1>
-        <p className='text-sm text-gray-500 mt-1'>
+        <h1 className="text-xl font-semibold">권한 승인</h1>
+        <p className="text-sm text-gray-500 mt-1">
           이 서비스가 Nook Auth 계정 정보를 요청합니다
         </p>
       </div>
 
-      <div className='space-y-4 text-sm'>
-        <div className='space-y-1'>
-          <p className='font-medium'>Client ID</p>
-          <p className='text-gray-600 break-all'>
+      <div className="space-y-4 text-sm">
+        <div className="space-y-1">
+          <p className="font-medium">Client ID</p>
+          <p className="text-gray-600 break-all">
             {clientId || '알 수 없는 client'}
           </p>
         </div>
 
-        <div className='space-y-2'>
-          <p className='font-medium'>요청 권한</p>
+        <div className="space-y-2">
+          <p className="font-medium">요청 권한</p>
           {scopes.length > 0 ? (
-            <ul className='space-y-1'>
+            <ul className="space-y-1">
               {scopes.map((item) => (
                 <li
                   key={item}
-                  className='rounded-md border border-gray-200 px-3 py-2 text-gray-700'
+                  className="rounded-md border border-gray-200 px-3 py-2 text-gray-700"
                 >
                   {item}
                 </li>
               ))}
             </ul>
           ) : (
-            <p className='text-gray-600'>요청된 scope가 없습니다</p>
+            <p className="text-gray-600">요청된 scope가 없습니다</p>
           )}
         </div>
       </div>
 
-      {error && <p className='text-sm text-red-600'>{error}</p>}
+      {error && <p className="text-sm text-red-600">{error}</p>}
 
-      <div className='grid grid-cols-2 gap-3'>
+      <div className="grid grid-cols-2 gap-3">
         <button
-          type='button'
+          type="button"
           disabled={loading !== null}
           onClick={() => submitConsent(false)}
-          className='py-2 rounded-md border border-gray-300 text-sm font-medium hover:bg-gray-50 disabled:opacity-50'
+          className="py-2 rounded-md border border-gray-300 text-sm font-medium hover:bg-gray-50 disabled:opacity-50"
         >
           {loading === 'deny' ? '거절 중...' : '거절'}
         </button>
         <button
-          type='button'
+          type="button"
           disabled={loading !== null}
           onClick={() => submitConsent(true)}
-          className='py-2 rounded-md bg-black text-white text-sm font-medium hover:bg-gray-800 disabled:opacity-50'
+          className="py-2 rounded-md bg-black text-white text-sm font-medium hover:bg-gray-800 disabled:opacity-50"
         >
           {loading === 'accept' ? '승인 중...' : '승인'}
         </button>

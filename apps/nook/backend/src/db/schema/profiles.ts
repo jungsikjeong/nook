@@ -8,10 +8,7 @@ export const profiles = pgTable('profiles', {
     .primaryKey()
     .references(() => users.id, { onDelete: 'cascade' }),
   nickname: varchar('nickname', { length: 20 }).unique(),
-  image: text('image')
-    .array()
-    .notNull()
-    .default(sql`'{}'::text[]`),
+  image: text('image').default(''),
   bio: varchar({ length: 160 }),
   createdAt: timestamp('created_at', { withTimezone: true })
     .notNull()
@@ -19,8 +16,7 @@ export const profiles = pgTable('profiles', {
   updatedAt: timestamp('updated_at', { withTimezone: true })
     .notNull()
     .defaultNow(),
-  },
-);
+});
 
 export const profilesRelations = relations(profiles, ({ one }) => ({
   user: one(users, {
