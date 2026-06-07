@@ -27,9 +27,15 @@ export type Me = {
 export async function getMe(): Promise<Me | null> {
   const res = await api.fetch('/users/me');
 
-  if (res.status === 401 || res.status === 404) {
-    return null;
+  if (!res.ok) {
+    throw new Error(`Failed to fetch current user: ${res.status}`);
   }
+
+  return (await res.json()) as Me;
+}
+
+export async function getMyProfile(): Promise<Me | null> {
+  const res = await api.fetch('/users/me/profile');
 
   if (!res.ok) {
     throw new Error(`Failed to fetch current user: ${res.status}`);

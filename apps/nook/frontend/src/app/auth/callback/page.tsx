@@ -1,4 +1,4 @@
-import { getMe } from '@/api/auth';
+import { getMyProfile } from '@/api/users';
 import { getSafeRedirectPath } from '@/lib/utils/get-safe-redirect-path';
 import { redirect } from 'next/navigation';
 
@@ -12,9 +12,9 @@ export default async function CallbackPage({ searchParams }: Props) {
   const { redirect_to } = await searchParams;
   const redirectTo = getSafeRedirectPath(redirect_to, '/', '/auth/callback');
 
-  const me = await getMe();
+  const myProfile = await getMyProfile();
 
-  if (!me || !me.profile?.nickname) {
+  if (!myProfile) {
     redirect(`/onboarding?redirect_to=${encodeURIComponent(redirectTo)}`);
   }
 

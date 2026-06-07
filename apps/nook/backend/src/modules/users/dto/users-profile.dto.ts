@@ -31,6 +31,11 @@ export class CreateProfileDto {
   bio?: string;
 }
 
+export type UpdateProfileInput = UpdateProfileDto & {
+  userId: string;
+  file?: Express.Multer.File;
+};
+
 export class UpdateProfileDto {
   @IsOptional()
   @Transform(trim)

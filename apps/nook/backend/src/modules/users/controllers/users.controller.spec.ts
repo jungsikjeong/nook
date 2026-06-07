@@ -3,6 +3,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundError } from '@nook/nest-common';
 import { UsersService } from '../services/users.service';
 import { UsersController } from './users.controller';
+import { UpdateProfileDto } from '../dto/users-profile.dto';
 
 describe('UsersController', () => {
   const mockUser: AuthenticatedUser = {
@@ -18,7 +19,8 @@ describe('UsersController', () => {
   const mockUsersService = {
     findById: jest.fn(),
     getProfileByUserId: jest.fn(),
-    create: jest.fn(),
+    updateProfile: jest.fn(),
+    uploadProfileImage: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -84,6 +86,72 @@ describe('UsersController', () => {
       const result = await controller.getProfile(mockUser);
 
       expect(result).toEqual(userProfile);
+    });
+  });
+
+  describe('PATCH: profileUpdate', () => {
+    it('해당 유저의 프로필을 업데이트해야 한다.', async () => {
+      const dto: UpdateProfileDto = { nickname: 'newNick', bio: '안녕' };
+      const mockFile = {
+        path: 'uploads/profile/123456-789.jpg',
+      } as Express.Multer.File;
+
+      const updated = {
+        userId: mockUser.sub,
+        nickname: 'newNick',
+        bio: '안녕',
+        image: '/uploads/profile/123456-789.jpg',
+      };
+
+      mockUsersService.updateProfile.mockResolvedValue(updated);
+
+      const result = await controller.updateProfile(mockUser, dto, mockFile);
+
+      expect(mockUsersService.updateProfile).toHaveBeenCalledWith({
+        updateDto: { userId: mockUser.sub, ...dto, file: mockFile },
+      });
+      expect(result).toEqual(updated);
+    });
+
+    it('파일 없이 텍스트만 업데이트할 수 있어야 한다.', async () => {
+      const dto: UpdateProfileDto = { nickname: 'newNick' };
+
+      mockUsersService.updateProfile.mockResolvedValue({ ...dto, image: '' });
+
+      await controller.updateProfile(mockUser, dto, undefined);
+
+      expect(mockUsersService.updateProfile).toHaveBeenCalledWith({
+        updateDto: { userId: mockUser.sub, ...dto, file: undefined },
+      });
+    });
+  });
+
+  describe('POST: uploadProfileImage', () => {
+    const mockFile = {
+      path: 'uploads/profile/123456-789.jpg',
+    } as Express.Multer.File;
+
+    it('userId와 file.path를 인자로 서비스를 호출해야 한다.', async () => {
+      mockUsersService.uploadProfileImage.mockResolvedValue({
+        imageUrl: '/uploads/profile/123456-789.jpg',
+      });
+
+      await controller.uploadProfileImage(mockUser, mockFile);
+
+      expect(mockUsersService.uploadProfileImage).toHaveBeenCalledWith(
+        mockUser.sub,
+        mockFile.path,
+      );
+    });
+
+    it('서비스가 반환한 imageUrl을 리턴해야 한다.', async () => {
+      const expected = { imageUrl: '/uploads/profile/123456-789.jpg' };
+
+      mockUsersService.uploadProfileImage.mockResolvedValue(expected);
+
+      const result = await controller.uploadProfileImage(mockUser, mockFile);
+
+      expect(result).toEqual(expected);
     });
   });
 });

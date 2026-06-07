@@ -13,6 +13,7 @@ import * as schema from './schema';
 export const DATABASE = Symbol('DATABASE');
 
 export type Database = PostgresJsDatabase<typeof schema>;
+export type DrizzleTx = Parameters<Parameters<Database['transaction']>[0]>[0];
 
 @Injectable()
 export class DbService implements OnModuleInit, OnModuleDestroy {
