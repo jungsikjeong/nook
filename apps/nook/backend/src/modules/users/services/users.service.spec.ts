@@ -8,6 +8,8 @@ type MockDb = {
     users: { findFirst: jest.Mock };
     profiles: { findFirst: jest.Mock };
   };
+  select: jest.Mock;
+  limit: jest.Mock;
   update: jest.Mock;
   set: jest.Mock;
   where: jest.Mock;
@@ -18,11 +20,20 @@ function createMockDb(): MockDb {
   const set = jest.fn(() => ({ where }));
   const update = jest.fn(() => ({ set }));
 
+  // findById의 select().from().leftJoin().where().limit() 체인 모킹
+  const limit = jest.fn().mockResolvedValue([]);
+  const selectWhere = jest.fn(() => ({ limit }));
+  const leftJoin = jest.fn(() => ({ where: selectWhere }));
+  const from = jest.fn(() => ({ leftJoin }));
+  const select = jest.fn(() => ({ from }));
+
   return {
     query: {
       users: { findFirst: jest.fn() },
       profiles: { findFirst: jest.fn() },
     },
+    select,
+    limit,
     update,
     set,
     where,
@@ -49,20 +60,25 @@ describe('UsersService', () => {
 
   describe('findById', () => {
     it('유저가 없으면 null을 리턴한다.', async () => {
-      db.query.users.findFirst.mockResolvedValue(undefined);
+      db.limit.mockResolvedValue([]);
 
       const result = await service.findById('non-existent-id');
 
       expect(result).toBeNull();
     });
 
-    it('유저가 있으면 유저를 반환한다.', async () => {
-      db.query.users.findFirst.mockResolvedValue({
-        id: 'user-1',
-        name: 'tester',
-        email: 'test@example.com',
-        emailVerified: false,
-      });
+    it('유저가 있으면 프로필을 합친 유저를 반환한다.', async () => {
+      db.limit.mockResolvedValue([
+        {
+          users: {
+            id: 'user-1',
+            name: 'tester',
+            email: 'test@example.com',
+            emailVerified: false,
+          },
+          profiles: { userId: 'user-1', nickname: 'nick' },
+        },
+      ]);
 
       const result = await service.findById('user-1');
 
@@ -70,7 +86,21 @@ describe('UsersService', () => {
         id: 'user-1',
         name: 'tester',
         email: 'test@example.com',
+        profile: { userId: 'user-1', nickname: 'nick' },
       });
+    });
+
+    it('프로필이 없으면 profile은 null이다.', async () => {
+      db.limit.mockResolvedValue([
+        {
+          users: { id: 'user-1', name: 'tester', email: 'test@example.com' },
+          profiles: null,
+        },
+      ]);
+
+      const result = await service.findById('user-1');
+
+      expect(result).toMatchObject({ id: 'user-1', profile: null });
     });
   });
 

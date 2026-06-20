@@ -45,12 +45,55 @@ describe('UsersController', () => {
       );
     });
 
-    it('유저가 있으면 유저를 반환한다.', async () => {
-      mockUsersService.findById.mockResolvedValue(mockUser);
+    it('유저가 있으면 프로필을 합쳐 닉네임과 함께 반환한다.', async () => {
+      const profile = {
+        userId: 'saas',
+        nickname: 'nick',
+        image: '/uploads/profile/a.png',
+        bio: '안녕',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      const dbUser = {
+        id: 'saas',
+        name: 'tester',
+        email: 'test@example.com',
+        emailVerified: true,
+        image: '',
+        role: 'USER',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        profile,
+      };
+      mockUsersService.findById.mockResolvedValue(dbUser);
 
       const result = await controller.findById(mockUser);
 
-      expect(result).toEqual(mockUser);
+      const { profile: _profile, ...userFields } = dbUser;
+      expect(result).toEqual({
+        ...userFields,
+        nickname: 'nick',
+        profile,
+      });
+    });
+
+    it('프로필이 없으면 nickname과 profile은 null이다.', async () => {
+      const dbUser = {
+        id: 'saas',
+        name: 'tester',
+        email: 'test@example.com',
+        emailVerified: true,
+        image: '',
+        role: 'USER',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        profile: null,
+      };
+      mockUsersService.findById.mockResolvedValue(dbUser);
+
+      const result = await controller.findById(mockUser);
+
+      expect(result).toMatchObject({ nickname: null, profile: null });
     });
   });
 

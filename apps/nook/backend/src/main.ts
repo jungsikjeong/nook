@@ -1,15 +1,13 @@
-import { Logger, ValidationPipe, VersioningType } from '@nestjs/common';
+import { Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { type NestExpressApplication } from '@nestjs/platform-express';
 import { toNodeHandler } from 'better-auth/node';
 import cookieParser from 'cookie-parser';
 import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
+import { ZodValidationPipe } from 'nestjs-zod';
 
-import {
-  RequestIdMiddleware,
-  VALIDATION_PIPE_OPTIONS,
-} from '@nook/nest-common';
+import { RequestIdMiddleware } from '@nook/nest-common';
 
 import { AppModule } from './app.module';
 import { auth } from './lib/auth';
@@ -44,7 +42,7 @@ async function bootstrap(): Promise<void> {
   app.useBodyParser('json');
   app.useBodyParser('urlencoded', { extended: true });
 
-  app.useGlobalPipes(new ValidationPipe(VALIDATION_PIPE_OPTIONS));
+  app.useGlobalPipes(new ZodValidationPipe());
 
   // Use URI versioning, e.g., /api/v1/endpoint
   app.setGlobalPrefix('api');

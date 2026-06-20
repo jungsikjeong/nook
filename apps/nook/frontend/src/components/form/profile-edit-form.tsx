@@ -66,6 +66,9 @@ export function ProfileEditForm({ mode = 'edit' }: Props) {
     // TODO: 프로필 수정 API 호출
     toast('프로필이 저장되었습니다.', {
       description: `닉네임: ${data.nickname}`,
+      classNames: {
+        description: '!text-popover-foreground !opacity-100 !font-semibold',
+      },
     });
   };
 

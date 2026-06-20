@@ -1,0 +1,263 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/api/users/me": {
+      "get": {
+        "operationId": "UsersController_findById",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/api/users/me/profile": {
+      "get": {
+        "operationId": "UsersController_getProfile",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileResDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/api/users/me/update-profile": {
+      "patch": {
+        "operationId": "UsersController_updateProfile",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateProfileDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileResDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/api/users/me/profile/image": {
+      "post": {
+        "operationId": "UsersController_uploadProfileImage",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UploadImageResDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "users"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "Nook API",
+    "description": "Nook 백엔드 OpenAPI 스펙",
+    "version": "0.1.0",
+    "contact": {}
+  },
+  "tags": [],
+  "servers": [],
+  "components": {
+    "securitySchemes": {
+      "cookie": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "better-auth.session_token"
+      }
+    },
+    "schemas": {
+      "UserResDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "emailVerified": {
+            "type": "boolean"
+          },
+          "image": {
+            "type": "string",
+            "nullable": true
+          },
+          "nickname": {
+            "type": "string",
+            "nullable": true
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "USER",
+              "ADMIN"
+            ]
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          },
+          "profile": {
+            "type": "object",
+            "properties": {
+              "userId": {
+                "type": "string"
+              },
+              "nickname": {
+                "type": "string",
+                "nullable": true
+              },
+              "image": {
+                "type": "string",
+                "nullable": true
+              },
+              "bio": {
+                "type": "string",
+                "nullable": true
+              },
+              "createdAt": {
+                "type": "string"
+              },
+              "updatedAt": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "userId",
+              "nickname",
+              "image",
+              "bio",
+              "createdAt",
+              "updatedAt"
+            ],
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "email",
+          "emailVerified",
+          "image",
+          "nickname",
+          "role",
+          "createdAt",
+          "updatedAt",
+          "profile"
+        ]
+      },
+      "ProfileResDto": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string"
+          },
+          "nickname": {
+            "type": "string",
+            "nullable": true
+          },
+          "image": {
+            "type": "string",
+            "nullable": true
+          },
+          "bio": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "userId",
+          "nickname",
+          "image",
+          "bio",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "UpdateProfileDto": {
+        "type": "object",
+        "properties": {
+          "nickname": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 20,
+            "pattern": "^[가-힣a-zA-Z0-9_]+$"
+          },
+          "bio": {
+            "type": "string",
+            "maxLength": 160
+          }
+        }
+      },
+      "UploadImageResDto": {
+        "type": "object",
+        "properties": {
+          "imageUrl": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "imageUrl"
+        ]
+      }
+    }
+  }
+}
