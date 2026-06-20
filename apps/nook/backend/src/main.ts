@@ -48,10 +48,6 @@ async function bootstrap(): Promise<void> {
 
   // Use URI versioning, e.g., /api/v1/endpoint
   app.setGlobalPrefix('api');
-  app.enableVersioning({
-    type: VersioningType.URI,
-    defaultVersion: '1',
-  });
 
   const port = config.get<number>('PORT') ?? 3001;
   await app.listen(port);

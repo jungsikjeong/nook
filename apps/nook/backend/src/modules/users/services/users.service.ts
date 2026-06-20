@@ -38,7 +38,11 @@ export class UsersService {
     return { imageUrl };
   }
 
-  async updateProfile({ updateDto }: { updateDto: UpdateProfileInput }): Promise<ProfileRow | null> {
+  async updateProfile({
+    updateDto,
+  }: {
+    updateDto: UpdateProfileInput;
+  }): Promise<ProfileRow | null> {
     const { userId, file, ...rest } = updateDto;
 
     const updateData: Partial<NewProfileRow> = { ...rest };

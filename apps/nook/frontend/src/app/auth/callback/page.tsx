@@ -1,4 +1,4 @@
-import { getMyProfile } from '@/api/users';
+import { getMyProfile } from '@/lib/api/users';
 import { getSafeRedirectPath } from '@/lib/utils/get-safe-redirect-path';
 import { redirect } from 'next/navigation';
 

@@ -50,7 +50,6 @@ type Props = {
 
 export function ProfileEditForm({ mode = 'edit' }: Props) {
   const { data: session, isPending } = authClient.useSession();
-  console.log(session);
 
   const router = useRouter();
 

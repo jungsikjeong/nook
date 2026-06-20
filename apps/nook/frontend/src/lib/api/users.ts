@@ -24,22 +24,12 @@ export type Me = {
   profile: Profile | null;
 };
 
-export async function getMe(): Promise<Me | null> {
-  const res = await api.fetch('/users/me');
-
-  if (!res.ok) {
-    throw new Error(`Failed to fetch current user: ${res.status}`);
-  }
-
-  return (await res.json()) as Me;
+export async function getMe(): Promise<Me> {
+  return api.get<Me>('/users/me');
 }
 
-export async function getMyProfile(): Promise<Me | null> {
-  const res = await api.fetch('/users/me/profile');
+export async function getMyProfile(): Promise<Profile | null> {
+  const profile = await api.get<Profile | null>('/users/me/profile');
 
-  if (!res.ok) {
-    throw new Error(`Failed to fetch current user: ${res.status}`);
-  }
-
-  return (await res.json()) as Me;
+  return profile ?? null;
 }
