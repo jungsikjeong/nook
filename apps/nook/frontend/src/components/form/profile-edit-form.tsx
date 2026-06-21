@@ -31,10 +31,12 @@ import {
 import { generateRandomNickname } from '@/lib/utils/generate-random-nickname';
 import { useRouter } from 'next/navigation';
 import { AvatarInput } from './avatar-input';
-import { authClient } from '@/lib/auth-client';
+import { updateProfileAction } from './profile-actions';
+import type { ProfileResDto } from '@/lib/api/generated';
 
 const profileSchema = z.object({
-  avatar: z.string().optional(),
+  // 기존 이미지는 URL(string), 새로 고른 이미지는 File 로 들어온다.
+  avatar: z.union([z.instanceof(File), z.string()]).optional(),
   nickname: z
     .string()
     .min(2, '닉네임은 2자 이상이어야 합니다.')
@@ -46,44 +48,55 @@ export type ProfileFormValues = z.infer<typeof profileSchema>;
 
 type Props = {
   mode: 'onboarding' | 'edit';
+  profile?: ProfileResDto | null;
 };
 
-export function ProfileEditForm({ mode = 'edit' }: Props) {
-  const { data: session, isPending } = authClient.useSession();
-
+export function ProfileEditForm({ mode = 'edit', profile }: Props) {
   const router = useRouter();
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
-    defaultValues: {
-      avatar: '',
-      nickname: '',
-      bio: '',
+    values: {
+      avatar: profile?.image ?? '',
+      nickname: profile?.nickname ?? '',
+      bio: profile?.bio ?? '',
     },
+    resetOptions: { keepDirtyValues: true },
   });
 
+  const isSubmitting = form.formState.isSubmitting;
+
   const onSubmit = async (data: ProfileFormValues) => {
-    // TODO: 프로필 수정 API 호출
-    toast('프로필이 저장되었습니다.', {
-      description: `닉네임: ${data.nickname}`,
-      classNames: {
-        description: '!text-popover-foreground !opacity-100 !font-semibold',
-      },
-    });
+    try {
+      await updateProfileAction({
+        nickname: data.nickname,
+        bio: data.bio,
+        // 새로 고른 파일일 때만 업로드한다. 기존 URL(string) 은 변경 없음으로 본다.
+        file: data.avatar instanceof File ? data.avatar : undefined,
+      });
+
+      toast('프로필이 저장되었습니다.', {
+        description: `닉네임: ${data.nickname}`,
+        classNames: {
+          description: '!text-popover-foreground !opacity-100 !font-semibold',
+        },
+      });
+
+      router.refresh();
+    } catch {
+      toast.error('프로필 저장에 실패했습니다. 잠시 후 다시 시도해주세요.');
+    }
   };
 
-  const handleCancel = () => {
+  const handleCancel = async () => {
     if (mode === 'onboarding') {
-      // 온보딩에서 취소 → 랜덤 닉네임으로 등록하고 진행
+      // 온보딩에서 취소 버튼 누르면 랜덤 닉네임으로 등록하고 진행
       const randomNickname = generateRandomNickname();
-      onSubmit({ ...form.getValues(), nickname: randomNickname });
+      await onSubmit({ ...form.getValues(), nickname: randomNickname });
+      return;
     }
 
-    if (mode === 'edit') {
-      // TODO
-    }
-
-    return;
+    form.reset();
   };
 
   const title = mode === 'onboarding' ? '프로필 설정' : '프로필 수정';
@@ -176,6 +189,7 @@ export function ProfileEditForm({ mode = 'edit' }: Props) {
             variant='outline'
             className='h-11 flex-1'
             onClick={() => handleCancel()}
+            disabled={isSubmitting}
           >
             취소
           </Button>
@@ -183,6 +197,7 @@ export function ProfileEditForm({ mode = 'edit' }: Props) {
             type='submit'
             form='profile-edit-form'
             className='h-11 flex-1'
+            disabled={isSubmitting}
           >
             저장
           </Button>

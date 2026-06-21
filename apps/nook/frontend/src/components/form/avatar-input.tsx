@@ -5,6 +5,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import Image from 'next/image';
+import { useEffect, useMemo } from 'react';
 import type { ControllerRenderProps } from 'react-hook-form';
 
 import type { ProfileFormValues } from './profile-edit-form';
@@ -18,19 +19,32 @@ export function AvatarInput({
   name,
   disabled,
 }: AvatarInputProps) {
-  const hasImage = Boolean(value);
+  // value 는 기존 이미지 URL(string) 또는 새로 고른 파일(File) 일 수 있다.
+  // 미리보기 URL 은 렌더 중 파생하고, File 로 만든 objectURL 만 effect 에서 정리한다.
+  const preview = useMemo(() => {
+    if (value instanceof File) return URL.createObjectURL(value);
+    if (typeof value === 'string') return value;
+    return '';
+  }, [value]);
+
+  useEffect(() => {
+    if (!preview.startsWith('blob:')) return;
+    return () => URL.revokeObjectURL(preview);
+  }, [preview]);
+
+  const hasImage = Boolean(preview);
 
   const onSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    // TODO: 실제 업로드 후 받은 URL을 onChange로 전달
-    onChange(URL.createObjectURL(file));
+    // 실제 파일을 폼 값으로 넘긴다. 업로드는 저장 시 FormData 로 전송한다.
+    onChange(file);
   };
 
   return (
     <div className='relative flex items-center gap-4'>
       <Avatar className='size-16'>
-        <AvatarImage src={value} />
+        <AvatarImage src={preview} />
         <AvatarFallback className='relative'>
           <Image
             src='/fullback.png'

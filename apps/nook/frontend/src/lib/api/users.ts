@@ -7,8 +7,6 @@ import type {
   UserResDto,
 } from '@/lib/api/generated';
 
-// 백엔드 OpenAPI 스펙에서 생성된 타입을 그대로 공유한다.
-// 스키마가 바뀌면 루트에서 `pnpm nook-gen:types` 로 재생성한다.
 export type Me = UserResDto;
 export type Profile = ProfileResDto;
 

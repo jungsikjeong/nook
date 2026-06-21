@@ -10,15 +10,16 @@ type MockDb = {
   };
   select: jest.Mock;
   limit: jest.Mock;
-  update: jest.Mock;
-  set: jest.Mock;
-  where: jest.Mock;
+  insert: jest.Mock;
+  values: jest.Mock;
+  onConflictDoUpdate: jest.Mock;
 };
 
 function createMockDb(): MockDb {
-  const where = jest.fn().mockResolvedValue(undefined);
-  const set = jest.fn(() => ({ where }));
-  const update = jest.fn(() => ({ set }));
+  // updateProfile의 insert().values().onConflictDoUpdate() 체인 모킹
+  const onConflictDoUpdate = jest.fn().mockResolvedValue(undefined);
+  const values = jest.fn(() => ({ onConflictDoUpdate }));
+  const insert = jest.fn(() => ({ values }));
 
   // findById의 select().from().leftJoin().where().limit() 체인 모킹
   const limit = jest.fn().mockResolvedValue([]);
@@ -34,9 +35,9 @@ function createMockDb(): MockDb {
     },
     select,
     limit,
-    update,
-    set,
-    where,
+    insert,
+    values,
+    onConflictDoUpdate,
   };
 }
 
@@ -129,7 +130,7 @@ describe('UsersService', () => {
   });
 
   describe('updateProfile', () => {
-    it('닉네임을 업데이트하면 업데이트된 프로필을 반환한다.', async () => {
+    it('닉네임을 upsert 하면 저장된 프로필을 반환한다.', async () => {
       db.query.profiles.findFirst.mockResolvedValue({
         userId: 'user-1',
         nickname: 'new-nick',
@@ -139,12 +140,41 @@ describe('UsersService', () => {
         updateDto: { userId: 'user-1', nickname: 'new-nick' },
       });
 
-      expect(db.update).toHaveBeenCalledWith(profiles);
-      expect(db.set).toHaveBeenCalledWith({ nickname: 'new-nick' });
+      expect(db.insert).toHaveBeenCalledWith(profiles);
+      expect(db.values).toHaveBeenCalledWith({
+        userId: 'user-1',
+        nickname: 'new-nick',
+      });
+      expect(db.onConflictDoUpdate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          target: profiles.userId,
+          set: expect.objectContaining({ nickname: 'new-nick' }),
+        }),
+      );
       expect(result).toMatchObject({ userId: 'user-1', nickname: 'new-nick' });
     });
 
-    it('파일이 있으면 이미지 경로가 업데이트된다.', async () => {
+    it('프로필 행이 없어도 새로 생성(insert)된다.', async () => {
+      // 온보딩 신규 유저: 조회 시점엔 행이 없다가 upsert 후 생성된다.
+      db.query.profiles.findFirst.mockResolvedValue({
+        userId: 'user-1',
+        nickname: 'first-nick',
+      });
+
+      const result = await service.updateProfile({
+        updateDto: { userId: 'user-1', nickname: 'first-nick', bio: '' },
+      });
+
+      expect(db.insert).toHaveBeenCalledWith(profiles);
+      expect(db.values).toHaveBeenCalledWith({
+        userId: 'user-1',
+        nickname: 'first-nick',
+        bio: '',
+      });
+      expect(result).toMatchObject({ userId: 'user-1', nickname: 'first-nick' });
+    });
+
+    it('파일이 있으면 이미지 경로가 저장된다.', async () => {
       db.query.profiles.findFirst.mockResolvedValue({
         userId: 'user-1',
         nickname: 'tester',
@@ -159,24 +189,21 @@ describe('UsersService', () => {
         updateDto: { userId: 'user-1', file },
       });
 
-      expect(db.set).toHaveBeenCalledWith({
+      expect(db.values).toHaveBeenCalledWith({
+        userId: 'user-1',
         image: '/uploads/profile/avatar.png',
       });
+      expect(db.onConflictDoUpdate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          set: expect.objectContaining({
+            image: '/uploads/profile/avatar.png',
+          }),
+        }),
+      );
       expect(result).toMatchObject({
         userId: 'user-1',
         image: '/uploads/profile/avatar.png',
       });
-    });
-
-    it('프로필이 없으면 업데이트 후 null을 반환한다.', async () => {
-      db.query.profiles.findFirst.mockResolvedValue(undefined);
-
-      const result = await service.updateProfile({
-        updateDto: { userId: 'user-1', bio: '안녕하세요' },
-      });
-
-      expect(db.set).toHaveBeenCalledWith({ bio: '안녕하세요' });
-      expect(result).toBeNull();
     });
   });
 });

@@ -59,9 +59,12 @@ export class UsersService {
     }
 
     await this.db
-      .update(profiles)
-      .set(updateData)
-      .where(eq(profiles.userId, userId));
+      .insert(profiles)
+      .values({ userId, ...updateData })
+      .onConflictDoUpdate({
+        target: profiles.userId,
+        set: { ...updateData, updatedAt: new Date() },
+      });
 
     return this.getProfileByUserId(userId);
   }
