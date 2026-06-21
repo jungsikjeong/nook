@@ -15,7 +15,7 @@ const items = [
     label: '프로젝트',
   },
   { src: '/folder.png', alt: 'folder', href: '/folder', label: '폴더' },
-  { src: '/memo.png', alt: 'memo', href: '/memo', label: '메모' },
+  { src: '/memo.png', alt: 'guestbook', href: '/guestbook', label: '발자취' },
 ] as const;
 
 export function BottomMenu() {
