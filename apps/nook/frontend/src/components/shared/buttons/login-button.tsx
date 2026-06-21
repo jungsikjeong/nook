@@ -3,7 +3,7 @@
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 import { authClient } from '@/lib/auth-client';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 
 function getCurrentPath(): string {
@@ -17,6 +17,7 @@ function getAuthCallbackURL(): string {
 }
 
 export function LoginButton() {
+  const router = useRouter();
   const pathname = usePathname();
   const { data: session, isPending } = authClient.useSession();
 
@@ -46,6 +47,7 @@ export function LoginButton() {
       }
     } else {
       await authClient.signOut();
+      router.refresh();
     }
   };
 
