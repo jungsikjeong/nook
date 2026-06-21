@@ -60,15 +60,13 @@ export function LoginButton() {
   };
 
   return (
-    <div className='flex justify-end p-4'>
-      <Button
-        onClick={handleLogin}
-        className='min-w-20 cursor-pointer'
-        disabled={!!isPending}
-        variant='outline'
-      >
-        {LoginButtonText()}
-      </Button>
-    </div>
+    <Button
+      onClick={handleLogin}
+      className='min-w-20 cursor-pointer'
+      disabled={!!isPending}
+      variant='outline'
+    >
+      {LoginButtonText()}
+    </Button>
   );
 }

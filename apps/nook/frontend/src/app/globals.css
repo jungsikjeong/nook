@@ -47,6 +47,14 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+
+  /* nook 브랜드 색 — 손그림 일러스트/에러·404 페이지용 */
+  --color-ink: #3a4636;
+  --color-blob: #7fae63;
+  --color-paper: #f4f1e8;
+  --color-leaf: #5b8a4e;
+  --color-clay: #c2683f;
+  --color-drop: #7fb0d0;
 }
 
 :root {
