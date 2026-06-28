@@ -1,0 +1,76 @@
+'use client';
+
+import { Button } from '@/components/ui/button';
+import { Spinner } from '@/components/ui/spinner';
+import { authClient } from '@/lib/auth-client';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
+
+function getCurrentPath(): string {
+  return `${window.location.pathname}${window.location.search}${window.location.hash}`;
+}
+
+function getAuthCallbackURL(): string {
+  const callbackUrl = new URL('/auth/callback', window.location.origin);
+  callbackUrl.searchParams.set('redirect_to', getCurrentPath());
+  return callbackUrl.toString();
+}
+
+export function LoginButton() {
+  const router = useRouter();
+  const { data: session, isPending } = authClient.useSession();
+
+  const isUser = Boolean(session?.user);
+
+  const handleLogin = async () => {
+    if (!isUser) {
+      const res = await authClient.signIn.oauth2({
+        providerId: 'nook-auth',
+        callbackURL: getAuthCallbackURL(),
+
+        // prevent the built-in redirect
+        fetchOptions: { onSuccess: () => {} },
+      });
+
+      if (res.data?.url) {
+        window.location.replace(res.data.url);
+      }
+
+      if (res.error) {
+        const { status, statusText, message } = res.error;
+        console.error(
+          `OAuth sign-in failed [${status} ${statusText}]: ${message ?? '알 수 없는 오류'}`,
+        );
+        toast.error(
+          status >= 500
+            ? '인증 서버에 연결할 수 없어요. 잠시 후 다시 시도해주세요.'
+            : '로그인에 실패했어요. 다시 시도해주세요.',
+        );
+      }
+    } else {
+      await authClient.signOut();
+      router.refresh();
+    }
+  };
+
+  const LoginButtonText = () => {
+    if (isPending) {
+      return <Spinner className='h-4 w-4' />;
+    }
+
+    if (isUser) return '로그아웃';
+
+    if (!isUser) return '로그인';
+  };
+
+  return (
+    <Button
+      onClick={handleLogin}
+      className='min-w-20 cursor-pointer'
+      disabled={!!isPending}
+      variant='outline'
+    >
+      {LoginButtonText()}
+    </Button>
+  );
+}

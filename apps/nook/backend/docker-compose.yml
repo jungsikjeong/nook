@@ -12,12 +12,13 @@ services:
       POSTGRES_USER: nook
       POSTGRES_PASSWORD: nook
       POSTGRES_DB: nook
+    # host 5432 는 네이티브 PostgreSQL 이 점유하므로 5434 로 매핑한다.
     ports:
-      - "5432:5432"
+      - '5434:5432'
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U nook -d nook"]
+      test: ['CMD-SHELL', 'pg_isready -U nook -d nook']
       interval: 5s
       timeout: 5s
       retries: 10
@@ -33,7 +34,7 @@ services:
     environment:
       DATABASE_URL: postgresql://nook:nook@postgres:5432/nook
     ports:
-      - "3001:3001"
+      - '3001:3001'
     depends_on:
       postgres:
         condition: service_healthy

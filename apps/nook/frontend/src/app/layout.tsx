@@ -1,23 +1,38 @@
+import { Toaster } from '@/components/ui/sonner';
+import { TooltipProvider } from '@/components/ui/tooltip';
 import type { Metadata } from 'next';
-import { Geist_Mono } from 'next/font/google';
+import { Geist_Mono, Nanum_Pen_Script } from 'next/font/google';
 import localFont from 'next/font/local';
 import './globals.css';
-import { HamburgerMenu } from '@/components/shared/menu';
-import { TooltipProvider } from '@/components/ui/tooltip';
 
 const paperlogy = localFont({
   variable: '--font-paperlogy',
   display: 'swap',
   src: [
-    { path: './fonts/Paperlogy-4Regular.woff2', weight: '400', style: 'normal' },
+    {
+      path: './fonts/Paperlogy-4Regular.woff2',
+      weight: '400',
+      style: 'normal',
+    },
     { path: './fonts/Paperlogy-5Medium.woff2', weight: '500', style: 'normal' },
-    { path: './fonts/Paperlogy-6SemiBold.woff2', weight: '600', style: 'normal' },
+    {
+      path: './fonts/Paperlogy-6SemiBold.woff2',
+      weight: '600',
+      style: 'normal',
+    },
   ],
 });
 
 const geistMono = Geist_Mono({
   variable: '--font-geist-mono',
   subsets: ['latin'],
+});
+
+const nanumPen = Nanum_Pen_Script({
+  variable: '--font-nanum-pen',
+  weight: '400',
+  subsets: ['latin'],
+  display: 'swap',
 });
 
 export const metadata: Metadata = {
@@ -33,15 +48,15 @@ export default function RootLayout({
   return (
     <html
       lang='en'
-      className={`${paperlogy.variable} ${geistMono.variable} antialiased`}
+      className={`${paperlogy.variable} ${geistMono.variable} ${nanumPen.variable} antialiased`}
     >
-      <body className='min-h-dvh bg-[#dbe7d8] md:bg-[#f3f3f3] md:flex md:items-center md:justify-center md:px-6'>
+      <body className='min-h-dvh bg-[#dbe7d8] md:flex md:items-center md:justify-center md:bg-[#f3f3f3] md:px-6'>
         <TooltipProvider delay={200}>
-          <main className='relative min-h-dvh w-full bg-[#dbe7d8] overflow-hidden md:min-h-0 md:h-180 md:max-w-310 md:rounded-[32px]'>
-            <HamburgerMenu />
+          <main className='relative min-h-dvh w-full overflow-hidden bg-[#dbe7d8] md:h-180 md:min-h-0 md:max-w-310 md:rounded-[32px]'>
             {children}
           </main>
         </TooltipProvider>
+        <Toaster position='top-center' />
       </body>
     </html>
   );

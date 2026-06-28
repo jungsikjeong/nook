@@ -1,28 +1,105 @@
-import { JwtPayload } from '@/modules/auth/strategies/jwt.strategy';
-import { CurrentUser } from '@/shared/decorators/current-user.decorator';
-import { Roles } from '@/shared/decorators/roles.decorator';
-import { Role } from '@/shared/enums/role.enum';
-import { Controller, Get, NotFoundException } from '@nestjs/common';
-import { UserResDto } from '../dto/users-res-dto';
+import {
+  AuthenticatedUser,
+  CurrentUser,
+} from '@/shared/decorators/current-user.decorator';
+import {
+  Body,
+  Controller,
+  Get,
+  ParseFilePipeBuilder,
+  Patch,
+  Post,
+  UploadedFile,
+  UseInterceptors,
+} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiBody, ApiConsumes, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { NotFoundError } from '@nook/nest-common';
+import { createDiskStorage } from '@/shared/storage/disk.storage';
 import { UsersService } from '../services/users.service';
+import { UpdateProfileDto } from '../dto/users-profile.dto';
+import {
+  ProfileResDto,
+  UploadImageResDto,
+  UserResDto,
+} from '../dto/users-res-dto';
 
+@ApiTags('users')
 @Controller('users')
 export class UsersController {
-  constructor(private readonly users: UsersService) {}
+  constructor(private readonly usersService: UsersService) {}
 
   @Get('me')
-  async me(@CurrentUser() current: JwtPayload): Promise<UserResDto> {
-    const user = await this.users.findByIdWithProfile(current.sub);
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
+  @ApiOkResponse({ type: UserResDto })
+  async findById(@CurrentUser() user: AuthenticatedUser) {
+    const userInfo = await this.usersService.findById(user.sub);
 
-    return user;
+    if (!userInfo) throw new NotFoundError('User not found');
+
+    const { profile, ...rest } = userInfo;
+
+    // 와이어 계약(UserResDto)에 맞춰 닉네임은 프로필에서 끌어올린다.
+    return {
+      ...rest,
+      nickname: profile?.nickname ?? null,
+      profile,
+    };
   }
 
-  @Get()
-  @Roles(Role.ADMIN)
-  async list(): Promise<UserResDto[]> {
-    return await this.users.listAll();
+  @Get('me/profile')
+  @ApiOkResponse({ type: ProfileResDto })
+  async getProfile(@CurrentUser() user: AuthenticatedUser) {
+    return await this.usersService.getProfileByUserId(user.sub);
+  }
+
+  @Patch('me/update-profile')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: createDiskStorage('./uploads/profile'),
+    }),
+  )
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({ type: UpdateProfileDto })
+  @ApiOkResponse({ type: ProfileResDto })
+  async updateProfile(
+    @CurrentUser() user: AuthenticatedUser,
+    @Body() updateProfileDto: UpdateProfileDto,
+    @UploadedFile(
+      new ParseFilePipeBuilder()
+        .addFileTypeValidator({ fileType: /jpeg|png|webp/ })
+        .addMaxSizeValidator({ maxSize: 5 * 1024 * 1024 })
+        .build({ fileIsRequired: false }),
+    )
+    file?: Express.Multer.File,
+  ) {
+    const updateDto = {
+      userId: user.sub,
+      ...updateProfileDto,
+      file,
+    };
+
+    return this.usersService.updateProfile({
+      updateDto,
+    });
+  }
+
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: createDiskStorage('./uploads/profile'),
+    }),
+  )
+  @Post('me/profile/image')
+  @ApiOkResponse({ type: UploadImageResDto })
+  uploadProfileImage(
+    @CurrentUser() user: AuthenticatedUser,
+    @UploadedFile(
+      new ParseFilePipeBuilder()
+        .addFileTypeValidator({ fileType: /jpeg|png|webp/ })
+        .addMaxSizeValidator({ maxSize: 5 * 1024 * 1024 })
+        .build(),
+    )
+    file: Express.Multer.File,
+  ) {
+    return this.usersService.uploadProfileImage(user.sub, file.path);
   }
 }

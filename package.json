@@ -4,14 +4,17 @@
   "private": true,
   "scripts": {
     "dev": "pnpm -r --parallel dev",
-    "dev:frontend": "pnpm --filter frontend dev",
-    "dev:backend": "pnpm --filter backend dev",
-    "dev:auth": "pnpm --filter auth dev",
+    "dev:idp": "pnpm --parallel --filter @nook/backend --filter @nook/auth --filter @nook/auth-web dev",
     "build": "pnpm -r build",
     "lint": "pnpm -r lint",
-    "typecheck": "pnpm -r typecheck"
+    "typecheck": "pnpm -r typecheck",
+    "nook-gen:types": "pnpm --filter @nook/backend openapi:gen && pnpm --filter @nook/frontend gen:api",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "devDependencies": {
+    "prettier": "^3.8.3",
+    "prettier-plugin-tailwindcss": "^0.8.0",
     "typescript": "^5.7.3"
   },
   "packageManager": "pnpm@10.33.0",

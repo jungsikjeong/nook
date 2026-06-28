@@ -1,19 +1,15 @@
 import { relations, sql } from 'drizzle-orm';
-import { pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
+import { pgTable, text, timestamp, varchar } from 'drizzle-orm/pg-core';
 
-import { users } from './users';
+import { users } from './auth';
 
 export const profiles = pgTable('profiles', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  userId: uuid('user_id')
-    .notNull()
-    .unique()
+  userId: text('user_id')
+    .primaryKey()
     .references(() => users.id, { onDelete: 'cascade' }),
-  profileImageUrls: text('profile_image_urls')
-    .array()
-    .notNull()
-    .default(sql`'{}'::text[]`),
-  bio: text('bio'),
+  nickname: varchar('nickname', { length: 20 }).unique(),
+  image: text('image').default(''),
+  bio: varchar({ length: 160 }),
   createdAt: timestamp('created_at', { withTimezone: true })
     .notNull()
     .defaultNow(),
@@ -26,13 +22,6 @@ export const profilesRelations = relations(profiles, ({ one }) => ({
   user: one(users, {
     fields: [profiles.userId],
     references: [users.id],
-  }),
-}));
-
-export const usersRelations = relations(users, ({ one }) => ({
-  profile: one(profiles, {
-    fields: [users.id],
-    references: [profiles.userId],
   }),
 }));
 

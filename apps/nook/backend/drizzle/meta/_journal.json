@@ -5,15 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1777204936349,
-      "tag": "0000_magical_champions",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1777209353608,
-      "tag": "0001_yummy_deathbird",
+      "when": 1780837045697,
+      "tag": "0000_simple_moon_knight",
       "breakpoints": true
     }
   ]

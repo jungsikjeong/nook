@@ -1,11 +1,11 @@
-import { Character } from '@/components/character';
-import { BottomMenu } from '@/components/shared/menu';
+import { AppHeader } from '@/components/shared/header';
+import { Main } from '@/features/main';
 
 export default function Home() {
   return (
     <>
-      <Character />
-      <BottomMenu />
+      <AppHeader />
+      <Main />
     </>
   );
 }
