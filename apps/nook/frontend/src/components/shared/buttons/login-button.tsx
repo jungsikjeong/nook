@@ -42,8 +42,15 @@ export function LoginButton() {
       }
 
       if (res.error) {
-        console.error('OAuth sign-in failed:', res.error);
-        toast.error('로그인에 실패했어요. 다시 시도해주세요.');
+        const { status, statusText, message } = res.error;
+        console.error(
+          `OAuth sign-in failed [${status} ${statusText}]: ${message ?? '알 수 없는 오류'}`,
+        );
+        toast.error(
+          status >= 500
+            ? '인증 서버에 연결할 수 없어요. 잠시 후 다시 시도해주세요.'
+            : '로그인에 실패했어요. 다시 시도해주세요.',
+        );
       }
     } else {
       await authClient.signOut();
