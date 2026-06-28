@@ -107,7 +107,7 @@ export function ProfileEditForm({ mode = 'edit', profile }: Props) {
 
   return (
     <Card className='w-full sm:max-w-md'>
-      <CardHeader>
+      <CardHeader className='max-md:hidden'>
         <CardTitle>{title}</CardTitle>
         <CardDescription>{description}</CardDescription>
       </CardHeader>
